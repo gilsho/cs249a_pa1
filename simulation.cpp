@@ -1,24 +1,19 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/tokenizer.hpp>
 #include "Tissue.h"
+#include "simulation.h"
 
 using namespace std;
 using namespace boost;
 
-Fwk::String coordToStr(Cell::Coordinates c) 
-{
-  Fwk::String s;
-  s = "(" + lexical_cast<Fwk::String>(c.x) + "," + lexical_cast<Fwk::String>(c.y) + "," 
-    + lexical_cast<Fwk::String>(c.z) + ")";
-  return s;
-}
+Simulation::Simulation(Fwk::String _name) : Fwk::NamedInterface(_name) {}
 
 /*
 Create a new tissue named "name". Quoted names are not accepted and therefore 
 names cannot contain any whitespace. NOTE: The tissue name WILL NOT be any of 
 the commands, i.e. there will not be a tissue named "tissueNew".
 */
-void tissueNew(Fwk::String tissue) {
+void Simulation::tissueNew(Fwk::String tissue) {
   cout << "creating new tissue named: " << tissue << "..." << endl;
 }
 
@@ -30,7 +25,7 @@ report it. In any case, your simulation should continue running as if this
 entry did not exist. A new CytotoxicCell should have antibody strength of 100 
 on all its membranes.
 */
-void cytotoxicCellNew(Fwk::String tissue, Cell::Coordinates loc)
+void Simulation::cytotoxicCellNew(Fwk::String tissue, Cell::Coordinates loc)
 {
   cout << "creating new cytoToxic cell in: " << tissue << ", at: " 
     << coordToStr(loc) << endl;
@@ -41,7 +36,7 @@ Create a new healthy HelperCell in "tissue" at location "loc". This command is
 identical to the cytotoxicCellNew command, except that it creates a new 
 HelperCell, which has antibody strength 0 on all its membranes.
 */
-void helperCellNew(Fwk::String tissue, Cell::Coordinates loc)
+void Simulation::helperCellNew(Fwk::String tissue, Cell::Coordinates loc)
 {
   cout << "creating new helper cell in: " << tissue << ", at: " 
     << coordToStr(loc) << endl;
@@ -53,7 +48,7 @@ membrane. You should proceed to the next command only when no more cells can be
 infected. At the end of the infection round, you should print statistics to 
 standard out as described here.
 */
-void infectionStart(Fwk::String tissue, Cell::Coordinates loc, 
+void Simulation::infectionStart(Fwk::String tissue, Cell::Coordinates loc, 
                     CellMembrane::Side side, AntibodyStrength strength)
 {
   cout << "starting infection in: " << tissue << "at: " << coordToStr(loc) 
@@ -63,7 +58,7 @@ void infectionStart(Fwk::String tissue, Cell::Coordinates loc,
 /*
 Remove all infected cells from "tissue".
 */
-void infectedCellsDel(Fwk::String tissue)
+void Simulation::infectedCellsDel(Fwk::String tissue)
 {
   cout << "removing infected cells in: " << tissue << endl;
 }
@@ -74,14 +69,14 @@ in "tissue". Like the other cell creation commands, the simulation should
 continue running despite any exception that may be thrown.
 */
 
-void cloneNew(Fwk::String tissue, Cell::Coordinates loc, 
+void Simulation::cloneNew(Fwk::String tissue, Cell::Coordinates loc, 
               CellMembrane::Side side)
 {
   cout << "cloning cell in: " << tissue << "at: " << coordToStr(loc) 
     << " in direction: " << side << endl;
 }
 
-void setAntibodyStrength(Fwk::String tissue, Cell::Coordinates loc,
+void Simulation::setAntibodyStrength(Fwk::String tissue, Cell::Coordinates loc,
                          CellMembrane::Side side, AntibodyStrength strength)
 {
   cout << "setting membrane strength of cell in: " << tissue << "at: " 
@@ -95,14 +90,14 @@ direction. Equivalent to writing Cell x y z cloneNew "loc" for each cell in
 the tissue. If any single cell throws an exception, you should continue the 
 simulation and clone the remaining cells.
 */
-void cloneCellsNew(Fwk::String tissue, CellMembrane::Side side) 
+void Simulation::cloneCellsNew(Fwk::String tissue, CellMembrane::Side side) 
 {
   cout << "cloning cells in tissue: " << tissue << " to: " 
     << side << endl;
 }
 
 
-Cell::Coordinates  getCoordinate(tokenizer<>::iterator token)
+Cell::Coordinates Simulation::getCoordinate(tokenizer<>::iterator token)
 {
   Cell::Coordinates loc;
   loc.x = lexical_cast<int>(*token++);
@@ -111,7 +106,7 @@ Cell::Coordinates  getCoordinate(tokenizer<>::iterator token)
   return loc;
 }
 
-CellMembrane::Side getSide(tokenizer<>::iterator token)
+CellMembrane::Side Simulation::getSide(tokenizer<>::iterator token)
 {
   if (*token == "north")
     return CellMembrane::north_;
@@ -135,7 +130,7 @@ CellMembrane::Side getSide(tokenizer<>::iterator token)
 
 }
 
-void parseCommand(Fwk::String textLine) 
+void Simulation::parseCommand(Fwk::String textLine) 
 {
   if (textLine == "" || textLine[0] == '#')
     return;
@@ -203,5 +198,13 @@ void parseCommand(Fwk::String textLine)
   } else {
     throw "Malformed command";
   }
-
 }
+
+Fwk::String Simulation::coordToStr(Cell::Coordinates c) 
+{
+  Fwk::String s;
+  s = "(" + lexical_cast<Fwk::String>(c.x) + "," + lexical_cast<Fwk::String>(c.y) + "," 
+    + lexical_cast<Fwk::String>(c.z) + ")";
+  return s;
+}
+

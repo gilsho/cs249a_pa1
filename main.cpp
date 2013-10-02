@@ -1,6 +1,7 @@
 #include <fstream>
 #include <stdlib.h>
 #include <queue>
+#include "simulation.h"
 
 using namespace std;
 
@@ -10,6 +11,7 @@ using namespace std;
   to the console.
 */
 int main(int argc, const char* argv[]) {
+  Simulation::Ptr sim = Simulation::SimulationNew("main simulation");
   ifstream infile(argv[1]);
   if(infile.fail()){
     //File error. Halt program.
@@ -22,7 +24,7 @@ int main(int argc, const char* argv[]) {
   while(!infile.eof()){
     getline(infile, textLine);
     try {
-      parseCommand(textLine);
+      sim->parseCommand(textLine);
     }
     catch (...) {
       cerr << "Excetion occurred while parseing command: [" << textLine << "]" 
