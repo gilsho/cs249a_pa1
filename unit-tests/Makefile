@@ -6,6 +6,8 @@
 # Source location Configuration
 # #################
 
+CXX = g++-4.6
+
 # Where the files you are testing will be located
 SRC_PATH += ../
 
@@ -17,10 +19,12 @@ GUNIT_BASE += gtest-1.6.0
 GUNIT_PATH += $(GUNIT_BASE)/include
 
 # The main source file names you will need to test.
-MAIN_FILES += Calculator
+MAIN_FILES += simulation Tissue
 
 # The objects corresponding to the tested files.
 MAIN_OBJ_PATH = $(addsuffix .o, $(addprefix $(SRC_PATH), $(MAIN_FILES)))
+
+LIBS = $(SRC_PATH)fwk/BaseCollection.o $(SRC_PATH)fwk/BaseNotifiee.o $(SRC_PATH)fwk/Exception.o 
 
 # ##################
 # Compiler parameters.
@@ -35,7 +39,7 @@ COMPILER_FLAGS += -g -Wall
 
 # This is a list of tests. You would add the name of any new tests you add here
 # and define it below.
-FILES += CalculatorTest
+FILES += SimulationTest
 
 # This is a list of object files.
 OBJS = $(addsuffix .o, $(FILES))
@@ -43,8 +47,8 @@ OBJS = $(addsuffix .o, $(FILES))
 # ##################
 # Targets for each file you are testing.
 # ##################
-CalculatorTest: CalculatorTest.cpp $(SRC_PATH)/Calculator.cpp $(SRC_PATH)/Calculator.h $(SRC_PATH)/Calculator.o
-	$(CXX) $(PREPROCESSOR_FLAGS) $(COMPILER_FLAGS) -c CalculatorTest.cpp
+SimulationTest: SimulationTest.cpp $(SRC_PATH)/Simulation.cpp $(SRC_PATH)/Simulation.h $(SRC_PATH)/Simulation.o
+	$(CXX) $(PREPROCESSOR_FLAGS) $(COMPILER_FLAGS) -c SimulationTest.cpp
 
 # ##################
 # Main Suite
@@ -54,7 +58,7 @@ CalculatorTest: CalculatorTest.cpp $(SRC_PATH)/Calculator.cpp $(SRC_PATH)/Calcul
 # above. It links the main google test library which has a main function that
 # pulls in our tests and runs them.
 main: $(FILES)
-	$(CXX) $(PREPROCESSOR_FLAGS) $(COMPILER_FLAGS) $(MAIN_OBJ_PATH) $(GUNIT_BASE)/make/gtest_main.a -lpthread $(OBJS) -o UnitTest
+	$(CXX) $(PREPROCESSOR_FLAGS) $(COMPILER_FLAGS) $(MAIN_OBJ_PATH) $(GUNIT_BASE)/make/gtest_main.a -lpthread $(OBJS) $(LIBS) -o UnitTest
 
 all: main
 

@@ -1,32 +1,12 @@
 #include "gtest/gtest.h"
-#include "Calculator.h"
+#include <fstream>
+#include <stdlib.h>
+#include <queue>
+#include "simulation.h"
+#include <iostream>
 
-TEST(Calculator, addsTwoNewNumbers) {
-  Calculator calc;
-  calc.firstOperandIs(2);
-  calc.secondOperandIs(5);
-  ASSERT_TRUE(7 == calc.add());
-}
 
-TEST(Calculator, multipliesTwoNewNumbers) {
-  Calculator calc;
-  calc.firstOperandIs(2);
-  calc.secondOperandIs(5);
-  ASSERT_TRUE(10 == calc.multiply());
-}
-
-TEST(Calculator, switchingOperandsForAdd) {
-  Calculator calc;
-  calc.firstOperandIs(2);
-  calc.secondOperandIs(5);
-  calc.secondOperandIs(9);
-  ASSERT_TRUE(11 == calc.add());
-}
-
-TEST(Calculator, switchingOperandsForMultiply) {
-  Calculator calc;
-  calc.firstOperandIs(2);
-  calc.secondOperandIs(5);
-  calc.secondOperandIs(9);
-  ASSERT_TRUE(18 == calc.multiply());
+TEST(Simulation, helloWorld) {
+  Simulation::Ptr sim = Simulation::SimulationNew("test simulation");
+  ASSERT_TRUE(sim->test() == 2);
 }

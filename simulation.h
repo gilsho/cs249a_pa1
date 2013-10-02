@@ -4,7 +4,10 @@
 
 #include <boost/lexical_cast.hpp>
 #include <boost/tokenizer.hpp>
+#include "fwk/LinkedList.h"
 #include "Tissue.h"
+
+
 
 using namespace std;
 using namespace boost;
@@ -40,8 +43,10 @@ public:
 	                         CellMembrane::Side side, AntibodyStrength strength);
 
 	void cloneCellsNew(Fwk::String tissue, CellMembrane::Side side);
-	
+
 	void parseCommand(Fwk::String textLine);
+
+	int test() {return 2;}
 
 
 protected:
