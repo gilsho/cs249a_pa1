@@ -6,7 +6,7 @@
 #include <boost/tokenizer.hpp>
 #include "fwk/LinkedList.h"
 #include "Tissue.h"
-
+#include <map>
 
 
 using namespace std;
@@ -25,7 +25,9 @@ public:
       return s;
    }
 
-	void tissueNew(Fwk::String tissue);
+	Tissue::Ptr tissueNew(Fwk::String _name);
+
+	Tissue::Ptr tissue(Fwk::String _name);
 
 	void cytotoxicCellNew(Fwk::String tissue, Cell::Coordinates loc);
 
@@ -55,6 +57,8 @@ protected:
 	Cell::Coordinates getCoordinate(tokenizer<>::iterator token);
 	CellMembrane::Side getSide(tokenizer<>::iterator token);
 	Fwk::String coordToStr(Cell::Coordinates c);
+
+	map<Fwk::String, Tissue::Ptr> tissues_;
 
 };
 

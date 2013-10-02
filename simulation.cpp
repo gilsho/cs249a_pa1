@@ -6,15 +6,22 @@
 using namespace std;
 using namespace boost;
 
-Simulation::Simulation(Fwk::String _name) : Fwk::NamedInterface(_name) {}
+Simulation::Simulation(Fwk::String _name) : Fwk::NamedInterface(_name) { }
 
 /*
 Create a new tissue named "name". Quoted names are not accepted and therefore 
 names cannot contain any whitespace. NOTE: The tissue name WILL NOT be any of 
 the commands, i.e. there will not be a tissue named "tissueNew".
 */
-void Simulation::tissueNew(Fwk::String tissue) {
-  cout << "creating new tissue named: " << tissue << "..." << endl;
+Tissue::Ptr Simulation::tissueNew(Fwk::String _name) {
+  Tissue::Ptr t = Tissue::TissueNew(_name);
+  tissues_[_name] = t;
+  return t;
+}
+
+Tissue::Ptr Simulation::tissue(Fwk::String _name)
+{
+  return tissues_[_name];
 }
 
 /*
@@ -25,10 +32,12 @@ report it. In any case, your simulation should continue running as if this
 entry did not exist. A new CytotoxicCell should have antibody strength of 100 
 on all its membranes.
 */
-void Simulation::cytotoxicCellNew(Fwk::String tissue, Cell::Coordinates loc)
+void Simulation::cytotoxicCellNew(Fwk::String _tissue, Cell::Coordinates loc)
 {
-  cout << "creating new cytoToxic cell in: " << tissue << ", at: " 
-    << coordToStr(loc) << endl;
+  Tissue::Ptr t = tissues_[_tissue];
+  Cell::Ptr c = Cell::CellNew(loc, t.ptr(), Cell::cytotoxicCell_);
+  t->cellIs(c);
+  //raise exception if cell already exists??
 }
 
 /*
@@ -36,10 +45,12 @@ Create a new healthy HelperCell in "tissue" at location "loc". This command is
 identical to the cytotoxicCellNew command, except that it creates a new 
 HelperCell, which has antibody strength 0 on all its membranes.
 */
-void Simulation::helperCellNew(Fwk::String tissue, Cell::Coordinates loc)
+void Simulation::helperCellNew(Fwk::String _tissue, Cell::Coordinates loc)
 {
-  cout << "creating new helper cell in: " << tissue << ", at: " 
-    << coordToStr(loc) << endl;
+  Tissue::Ptr t = tissues_[_tissue];
+  Cell::Ptr c = Cell::CellNew(loc, t.ptr(), Cell::helperCell_);
+  t->cellIs(c);
+  //raise exception if cell already exists??
 }
 
 /*
@@ -48,51 +59,57 @@ membrane. You should proceed to the next command only when no more cells can be
 infected. At the end of the infection round, you should print statistics to 
 standard out as described here.
 */
-void Simulation::infectionStart(Fwk::String tissue, Cell::Coordinates loc, 
+void Simulation::infectionStart(Fwk::String _tissue, Cell::Coordinates loc, 
                     CellMembrane::Side side, AntibodyStrength strength)
 {
-  cout << "starting infection in: " << tissue << "at: " << coordToStr(loc) 
+  cout << "starting infection in: " << _tissue << "at: " << coordToStr(loc) 
     << ", side:" << side << " with strength: " << strength << endl;
 }
 
 /*
-Remove all infected cells from "tissue".
+Remove all infected cells from "_tissue".
 */
-void Simulation::infectedCellsDel(Fwk::String tissue)
+void Simulation::infectedCellsDel(Fwk::String _tissue)
 {
-  cout << "removing infected cells in: " << tissue << endl;
+  Tissue::Ptr t = tissues_[_tissue];
+  Tissue::CellIterator it = t->cellIter();
+  for (int i = 0; i < t->cells(); i++, it++) {
+    if ((*it)->health() == Cell::infected()) {
+      t->cellDel((*it)->name());
+    }
+  }
 }
 
 /*
 Clones cell at location "loc" and places the new cell "side" of "loc" (x,y+1,z) 
-in "tissue". Like the other cell creation commands, the simulation should 
+in "_tissue". Like the other cell creation commands, the simulation should 
 continue running despite any exception that may be thrown.
 */
 
-void Simulation::cloneNew(Fwk::String tissue, Cell::Coordinates loc, 
+void Simulation::cloneNew(Fwk::String _tissue, Cell::Coordinates loc, 
               CellMembrane::Side side)
 {
-  cout << "cloning cell in: " << tissue << "at: " << coordToStr(loc) 
+  cout << "cloning cell in: " << _tissue << "at: " << coordToStr(loc) 
     << " in direction: " << side << endl;
 }
 
-void Simulation::setAntibodyStrength(Fwk::String tissue, Cell::Coordinates loc,
+void Simulation::setAntibodyStrength(Fwk::String _tissue, Cell::Coordinates loc,
                          CellMembrane::Side side, AntibodyStrength strength)
 {
-  cout << "setting membrane strength of cell in: " << tissue << "at: " 
+  cout << "setting membrane strength of cell in: " << _tissue << "at: " 
     << coordToStr(loc) << " dir: " << side << " strength: " 
     << strength << endl;
 }
 
 /*
-Tissue Tissue1 cloneCellsNew west — Clones all cells in "tissue" to the "loc"
+Tissue Tissue1 cloneCellsNew west — Clones all cells in "_tissue" to the "loc"
 direction. Equivalent to writing Cell x y z cloneNew "loc" for each cell in
-the tissue. If any single cell throws an exception, you should continue the 
+the _tissue. If any single cell throws an exception, you should continue the 
 simulation and clone the remaining cells.
 */
-void Simulation::cloneCellsNew(Fwk::String tissue, CellMembrane::Side side) 
+void Simulation::cloneCellsNew(Fwk::String _tissue, CellMembrane::Side side) 
 {
-  cout << "cloning cells in tissue: " << tissue << " to: " 
+  cout << "cloning cells in _tissue: " << _tissue << " to: " 
     << side << endl;
 }
 
@@ -144,16 +161,16 @@ void Simulation::parseCommand(Fwk::String textLine)
       token++;
       tissueNew(*token);
     } else {
-      Fwk::String tissue = *token;
+      Fwk::String _tissue = *token;
       token++;
       if (*token == "cytotoxicCellNew") {
         token++;
         Cell::Coordinates loc = getCoordinate(token);
-        cytotoxicCellNew(tissue, loc);
+        cytotoxicCellNew(_tissue, loc);
       } else if (*token == "helperCellNew") {
         token++;
         Cell::Coordinates loc = getCoordinate(token);
-        helperCellNew(tissue, loc);
+        helperCellNew(_tissue, loc);
       } else if (*token == "infectionStartLocationIs") {
         token++;
         Cell::Coordinates loc = getCoordinate(token);
@@ -161,20 +178,20 @@ void Simulation::parseCommand(Fwk::String textLine)
         CellMembrane::Side side = getSide(token++);
         AntibodyStrength strength = 
           AntibodyStrength(lexical_cast<int>(*token++)); 
-        infectionStart(tissue, loc, side, strength);
+        infectionStart(_tissue, loc, side, strength);
       } else if (*token == "infectedCellsDel") {
-        infectedCellsDel(tissue);
+        infectedCellsDel(_tissue);
       } else if (*token == "cloneCellsNew") {
         token++;
         CellMembrane::Side side = getSide(token++);
-        cloneCellsNew(tissue, side);
+        cloneCellsNew(_tissue, side);
       } else {
         throw "Malformed command";
       }
     }
   } else if (*token == "Cell") {
     token++;
-    Fwk::String tissue = *token++;
+    Fwk::String _tissue = *token++;
     Cell::Coordinates loc = getCoordinate(token);
     token++; token++; token++;
     if (*token == "membrane") {
@@ -184,14 +201,14 @@ void Simulation::parseCommand(Fwk::String textLine)
         *token++;
         AntibodyStrength strength = 
           AntibodyStrength(lexical_cast<int>(*token++));
-        setAntibodyStrength(tissue, loc, side, strength);
+        setAntibodyStrength(_tissue, loc, side, strength);
       } else {
         throw "Malformed command";
       }
     } else if (*token == "cloneNew") {
       token++;
       CellMembrane::Side side = getSide(token++);
-      cloneNew(tissue, loc, side);
+      cloneNew(_tissue, loc, side);
     } else {
       throw "Malformed command";
     }
