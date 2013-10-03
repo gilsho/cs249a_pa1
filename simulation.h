@@ -4,9 +4,9 @@
 
 #include <boost/lexical_cast.hpp>
 #include <boost/tokenizer.hpp>
+#include <map>
 #include "fwk/LinkedList.h"
 #include "Tissue.h"
-#include <map>
 
 
 using namespace std;
@@ -17,6 +17,7 @@ class Simulation : public Fwk::NamedInterface
 {
 
 public:
+
   typedef Fwk::Ptr<Simulation const> PtrConst;
   typedef Fwk::Ptr<Simulation> Ptr;
 	static Simulation::Ptr SimulationNew(Fwk::String _name) {
@@ -48,10 +49,19 @@ public:
 
 	void parseCommand(Fwk::String textLine);
 
-	int test() {return 2;}
-
 
 protected:
+	class TissueReactor : public Tissue::Notifiee
+	{ 
+		public:
+			virtual void onCellNew( Cell::Ptr );
+			static TissueReactor *TissueReactorIs(Tissue *t) {
+				return new TissueReactor(t);
+			}
+		protected:
+			TissueReactor(Tissue *t) : Tissue::Notifiee() {}
+	};
+
 	Simulation(Fwk::String _name);
 	~Simulation() {}
 	Cell::Coordinates getCoordinate(tokenizer<>::iterator token);
@@ -61,14 +71,5 @@ protected:
 	map<Fwk::String, Tissue::Ptr> tissues_;
 
 };
-
-
-#include <boost/lexical_cast.hpp>
-#include <boost/tokenizer.hpp>
-#include "Tissue.h"
-#include "simulation.h"
-
-using namespace std;
-using namespace boost;
 
 #endif

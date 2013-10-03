@@ -1,6 +1,5 @@
 #include <fstream>
 #include <stdlib.h>
-#include <queue>
 #include "simulation.h"
 
 using namespace std;

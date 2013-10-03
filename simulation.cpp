@@ -1,10 +1,27 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/tokenizer.hpp>
-#include "Tissue.h"
 #include "simulation.h"
+#include <queue>
 
 using namespace std;
 using namespace boost;
+
+template <typename T>
+void assertValidPtr(Fwk::Ptr<T> p) {
+  if (p.ptr() == NULL) {
+    throw "null pointer exception";
+  }
+}
+
+void Simulation::TissueReactor::onCellNew(Cell::Ptr c)
+{
+  c->membraneNew(c->name() + " north", CellMembrane::north());
+  c->membraneNew(c->name() + " south", CellMembrane::south());
+  c->membraneNew(c->name() + " east", CellMembrane::east());
+  c->membraneNew(c->name() + " west", CellMembrane::west());
+  c->membraneNew(c->name() + " up", CellMembrane::up());
+  c->membraneNew(c->name() + " down", CellMembrane::down());
+}
 
 Simulation::Simulation(Fwk::String _name) : Fwk::NamedInterface(_name) { }
 
@@ -15,6 +32,8 @@ the commands, i.e. there will not be a tissue named "tissueNew".
 */
 Tissue::Ptr Simulation::tissueNew(Fwk::String _name) {
   Tissue::Ptr t = Tissue::TissueNew(_name);
+  TissueReactor::Ptr r = TissueReactor::TissueReactorIs(t.ptr());
+  r->notifierIs(t);
   tissues_[_name] = t;
   return t;
 }
@@ -35,7 +54,9 @@ on all its membranes.
 void Simulation::cytotoxicCellNew(Fwk::String _tissue, Cell::Coordinates loc)
 {
   Tissue::Ptr t = tissues_[_tissue];
+  assertValidPtr(t);
   Cell::Ptr c = Cell::CellNew(loc, t.ptr(), Cell::cytotoxicCell_);
+  assertValidPtr(c);
   t->cellIs(c);
   //raise exception if cell already exists??
 }
@@ -48,7 +69,9 @@ HelperCell, which has antibody strength 0 on all its membranes.
 void Simulation::helperCellNew(Fwk::String _tissue, Cell::Coordinates loc)
 {
   Tissue::Ptr t = tissues_[_tissue];
+  assertValidPtr(t);
   Cell::Ptr c = Cell::CellNew(loc, t.ptr(), Cell::helperCell_);
+  assertValidPtr(c);
   t->cellIs(c);
   //raise exception if cell already exists??
 }
@@ -62,8 +85,13 @@ standard out as described here.
 void Simulation::infectionStart(Fwk::String _tissue, Cell::Coordinates loc, 
                     CellMembrane::Side side, AntibodyStrength strength)
 {
-  cout << "starting infection in: " << _tissue << "at: " << coordToStr(loc) 
-    << ", side:" << side << " with strength: " << strength << endl;
+  // Tissue::Ptr t = tissues_[_tissue];
+  // assertValidPtr(t);
+  // Cell::Ptr c = *(t->cellIter(loc));
+  // CellMembrane::Ptr m = *(c->membraneIter(side));
+  // if (m->antibodyStrength() >= strength)
+
+  //   return;
 }
 
 /*
@@ -72,10 +100,13 @@ Remove all infected cells from "_tissue".
 void Simulation::infectedCellsDel(Fwk::String _tissue)
 {
   Tissue::Ptr t = tissues_[_tissue];
+  assertValidPtr(t);
   Tissue::CellIterator it = t->cellIter();
-  for (int i = 0; i < t->cells(); i++, it++) {
-    if ((*it)->health() == Cell::infected()) {
-      t->cellDel((*it)->name());
+  for (int i = 0; i < t->cells(); i++, ++it) {
+    Cell::Ptr c = *it;
+    assertValidPtr(c);
+    if (c->health() == Cell::infected()) {
+      t->cellDel(c->name());
     }
   }
 }
@@ -89,16 +120,37 @@ continue running despite any exception that may be thrown.
 void Simulation::cloneNew(Fwk::String _tissue, Cell::Coordinates loc, 
               CellMembrane::Side side)
 {
-  cout << "cloning cell in: " << _tissue << "at: " << coordToStr(loc) 
-    << " in direction: " << side << endl;
+  Tissue::Ptr t = tissues_[_tissue];
+  assertValidPtr(t);
+  Cell::Ptr c = *(t->cellIter(loc));
+  assertValidPtr(c);
+  Cell::Coordinates cloneLoc = loc;
+    if (side == CellMembrane::north())
+      cloneLoc.y++;
+    else if (side == CellMembrane::south())
+      cloneLoc.y--;
+    else if (side == CellMembrane::east())
+     cloneLoc.x++;
+    else if (side == CellMembrane::west())
+      cloneLoc.x--;
+    else if (side == CellMembrane::up())
+      cloneLoc.z++;
+    else if (side == CellMembrane::down())
+      cloneLoc.z--;
+  Cell::Ptr clone = Cell::CellNew(cloneLoc, t.ptr(), c->cellType());
+  t->cellIs(clone);
 }
 
 void Simulation::setAntibodyStrength(Fwk::String _tissue, Cell::Coordinates loc,
                          CellMembrane::Side side, AntibodyStrength strength)
 {
-  cout << "setting membrane strength of cell in: " << _tissue << "at: " 
-    << coordToStr(loc) << " dir: " << side << " strength: " 
-    << strength << endl;
+  Tissue::Ptr t = tissues_[_tissue];
+  assertValidPtr(t);
+  Cell::Ptr c = *(t->cellIter(loc));
+  assertValidPtr(c);
+  CellMembrane::Ptr m = *(c->membraneIterConst(side));
+  assertValidPtr(m);
+  m->antibodyStrengthIs(strength);
 }
 
 /*

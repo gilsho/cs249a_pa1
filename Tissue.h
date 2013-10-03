@@ -384,7 +384,7 @@ public:
       virtual void onCellDel( Cell::Ptr ) {}
 
 
-void onCell() {}
+      void onCell() {}
       void tacKeyForCellIs(Fwk::String _tacKeyForCell) {
          tacKeyForCell_ = _tacKeyForCell;
       }
@@ -658,6 +658,5 @@ protected:
 
 Tissue::Ptr tissueFactory( Fwk::String _name );
 Fwk::String valueToStrep( CellMembrane::Side s );
-
 
 #endif

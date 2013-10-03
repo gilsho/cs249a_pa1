@@ -2,9 +2,35 @@
 #include <fstream>
 #include <stdlib.h>
 #include <queue>
-#include "simulation.h"
 #include <iostream>
+#include "simulation.h"
 
+
+bool membraneStrength(Tissue::Ptr t, Cell::Coordinates loc,
+    CellMembrane::Side side, AntibodyStrength strength)
+{
+  Cell::Ptr c = (*t->cellIter(loc));
+  if (c.ptr() == NULL)
+    return false;
+  CellMembrane::Ptr m = (*c->membraneIterConst(side));
+  if (m.ptr() == NULL)
+    return false;
+  return (m->antibodyStrength() == strength);
+}
+
+bool cellExists(Tissue::Ptr t, Cell::Coordinates loc, 
+                Cell::CellType ctype, Cell::HealthId health)
+{
+  Tissue::CellIterator it = t->cellIter(loc);
+  if (it.ptr() == NULL)
+    return false;
+  if (it->cellType() != ctype)
+    return false;
+  if (it->health() != health)
+    return false;
+
+  return true;
+}
 
 TEST(Simulation, tissueNew) 
 {
@@ -34,16 +60,14 @@ TEST(Simulation, cytotoxicCellNew)
   Simulation::Ptr sim = Simulation::SimulationNew("test");
   string tissue = "tissue1";
   Tissue::Ptr t = sim->tissueNew(tissue);
-  Cell::Coordinates loc;
+  Cell::Coordinates loc = { 4, 5, 17};
   loc.x = 4; 
   loc.y = 5; 
   loc.z = 17;
   sim->cytotoxicCellNew(tissue, loc);
-  Tissue::CellIteratorConst it = t->cellIterConst();
-  ASSERT_TRUE((*it)->location().x == 4);
-  ASSERT_TRUE((*it)->location().y == 5);
-  ASSERT_TRUE((*it)->location().z == 17);
-  ASSERT_TRUE((*it)->cellType() == Cell::cytotoxicCell_);
+  ASSERT_TRUE(cellExists(t, loc, Cell::cytotoxicCell(), 
+    Cell::healthy()));
+
 }
 
 TEST(Simulation, helperCellNew)
@@ -51,73 +75,98 @@ TEST(Simulation, helperCellNew)
   Simulation::Ptr sim = Simulation::SimulationNew("test");
   string tissue = "tissue1";
   Tissue::Ptr t = sim->tissueNew(tissue);
-  Cell::Coordinates loc;
-  loc.x = 14; 
-  loc.y = 31; 
-  loc.z = 7;
+  Cell::Coordinates loc = {12, -13, -21};
   sim->helperCellNew(tissue, loc);
-  Tissue::CellIteratorConst it = t->cellIterConst();
-  ASSERT_TRUE((*it)->location().x == 14);
-  ASSERT_TRUE((*it)->location().y == 31);
-  ASSERT_TRUE((*it)->location().z == 7);
-  ASSERT_TRUE((*it)->cellType() == Cell::helperCell_);
+  ASSERT_TRUE(cellExists(t, loc, Cell::helperCell(), 
+    Cell::healthy()));
 }
 
 TEST(Simulation, setAntibodyStrength)
 {
-  // Simulation::Ptr sim = Simulation::SimulationNew("test");
-  // string tissue = "tissue1";
-  // Tissue::Ptr t = sim->tissueNew(tissue);
-  // Cell::Coordinates loc;
-  // loc.x = 14; 
-  // loc.y = 31; 
-  // loc.z = 7;
-  // sim->helperCellNew(tissue, loc);
-  // Cell::CellIteratorConst it = t->cellIterConst();
-  // ASSERT_TRUE(*it->location().x == 14);
-  // ASSERT_TRUE(*it->location().y == 31);
-  // ASSERT_TRUE(*it->location().z == 7);
+  Simulation::Ptr sim = Simulation::SimulationNew("test");
+  string tissue = "tissue1";
+  Tissue::Ptr t = sim->tissueNew(tissue);
+  Cell::Coordinates loc = {2, 2, 2};
+  CellMembrane::Side side = CellMembrane::up();
+  AntibodyStrength strength = AntibodyStrength(20);
+  sim->helperCellNew(tissue, loc);
+  sim->setAntibodyStrength(tissue, loc, side, strength);
+  ASSERT_TRUE(membraneStrength(t, loc, side, strength));
 }
+
+
 
 TEST(Simulation, cloneNew)
 {
   Simulation::Ptr sim = Simulation::SimulationNew("test");
   string tissue = "tissue1";
   Tissue::Ptr t = sim->tissueNew(tissue);
-  Cell::Coordinates loc;
-  loc.x = 1; 
-  loc.y = 1; 
-  loc.z = 1;
-  //Cell::CellIterator it = t->cellIter();
-  Cell::Ptr c = Cell::CellNew(loc, t.ptr(), Cell::helperCell_);
-  t->cellIs(c);
-  CellMembrane::Side side = CellMembrane::north_;
-  sim->cloneNew(tissue, loc, side);
+  Cell::Coordinates loc1 = {1, 1, 1};
+  Cell::Coordinates loc2 = {1, 1, 2};
+  Cell::Coordinates loc3 = {1, 1, 0};
+  Cell::Coordinates loc4 = {0, 1, 1};
+  Cell::Coordinates loc5 = {2, 1, 1};
+  Cell::Coordinates loc6 = {1, 0, 1};
+  Cell::Coordinates loc7 = {1, 2, 1};
+
+  sim->helperCellNew(tissue, loc1);
+  sim->cloneNew(tissue, loc1, CellMembrane::up());
   
   ASSERT_TRUE(t->cells() == 2);
+  ASSERT_TRUE(cellExists(t, loc1, Cell::helperCell(), Cell::healthy()));
+  ASSERT_TRUE(cellExists(t, loc2, Cell::helperCell(), Cell::healthy()));
 
-  Tissue::CellIteratorConst it = t->cellIterConst();
-  bool newExists = false;
-  bool oldExists = false;
-  // for (int i = 0; i < 2; i++, it->advance()) {
-    ASSERT_TRUE((*it)->location().x == 1);
-    ASSERT_TRUE((*it)->location().y == 1);
-    if ((*it)->location().z == 1)
-      oldExists = true;
-    if ((*it)->location().z == 2) 
-      newExists = true;
-  // }
-  ASSERT_TRUE(newExists);
-  ASSERT_TRUE(oldExists);
+  sim->cloneNew(tissue, loc1, CellMembrane::down());
+  ASSERT_TRUE(t->cells() == 3);
+  ASSERT_TRUE(cellExists(t, loc3, Cell::helperCell(), Cell::healthy()));
+
+  sim->cloneNew(tissue, loc1, CellMembrane::west());
+  ASSERT_TRUE(t->cells() == 4);
+  ASSERT_TRUE(cellExists(t, loc4, Cell::helperCell(), Cell::healthy()));
+
+  sim->cloneNew(tissue, loc1, CellMembrane::east());
+  ASSERT_TRUE(t->cells() == 5);
+  ASSERT_TRUE(cellExists(t, loc5, Cell::helperCell(), Cell::healthy()));
+
+  sim->cloneNew(tissue, loc1, CellMembrane::south());
+  ASSERT_TRUE(t->cells() == 6);
+  ASSERT_TRUE(cellExists(t, loc6, Cell::helperCell(), Cell::healthy()));
+
+  sim->cloneNew(tissue, loc1, CellMembrane::north());
+  ASSERT_TRUE(t->cells() == 7);
+  ASSERT_TRUE(cellExists(t, loc7, Cell::helperCell(), Cell::healthy()));
+
 }
 
 
-TEST(Simulation, infectionStart)
+TEST(Simulation, infectionStart_FirstCellFail)
 {
-  ASSERT_TRUE(true);
+  ASSERT_TRUE(false);  
 }
 
 TEST(Simulation, infectedCellsDel)
 {
-  ASSERT_TRUE(true);
+  Simulation::Ptr sim = Simulation::SimulationNew("test");
+  string tissue = "tissue1";
+  Tissue::Ptr t = sim->tissueNew(tissue);
+  Cell::Coordinates loc1 = {1, 2, 3};
+  Cell::Coordinates loc2 = {4, 5, 6};
+  sim->helperCellNew(tissue, loc1);
+  sim->helperCellNew(tissue, loc2);
+  Cell::Ptr c1;
+  Cell::Ptr c2;
+
+  sim->infectedCellsDel(tissue);
+  c1 = *(t->cellIter(loc1));
+  c2 = *(t->cellIter(loc2));
+  ASSERT_TRUE(c1.ptr() != NULL);
+  ASSERT_TRUE(c2.ptr() != NULL);
+
+  c1->healthIs(Cell::infected());
+  sim->infectedCellsDel(tissue);
+  c1 = *(t->cellIter(loc1));
+  c2 = *(t->cellIter(loc2));
+  ASSERT_TRUE(c1.ptr() == NULL);
+  ASSERT_TRUE(c2.ptr() != NULL);
+
 }
