@@ -64,7 +64,7 @@ TEST(Simulation, cytotoxicCellNew)
   loc.x = 4; 
   loc.y = 5; 
   loc.z = 17;
-  sim->cytotoxicCellNew(tissue, loc);
+  sim->cellNew(tissue, loc, Cell::cytotoxicCell());
   ASSERT_TRUE(cellExists(t, loc, Cell::cytotoxicCell(), 
     Cell::healthy()));
 
@@ -76,12 +76,12 @@ TEST(Simulation, helperCellNew)
   string tissue = "tissue1";
   Tissue::Ptr t = sim->tissueNew(tissue);
   Cell::Coordinates loc = {12, -13, -21};
-  sim->helperCellNew(tissue, loc);
+  sim->cellNew(tissue, loc, Cell::helperCell());
   ASSERT_TRUE(cellExists(t, loc, Cell::helperCell(), 
     Cell::healthy()));
 }
 
-TEST(Simulation, setAntibodyStrength)
+TEST(Simulation, antibodyStrength)
 {
   Simulation::Ptr sim = Simulation::SimulationNew("test");
   string tissue = "tissue1";
@@ -89,8 +89,8 @@ TEST(Simulation, setAntibodyStrength)
   Cell::Coordinates loc = {2, 2, 2};
   CellMembrane::Side side = CellMembrane::up();
   AntibodyStrength strength = AntibodyStrength(20);
-  sim->helperCellNew(tissue, loc);
-  sim->setAntibodyStrength(tissue, loc, side, strength);
+  sim->cellNew(tissue, loc, Cell::helperCell());
+  sim->antibodyStrengthIs(tissue, loc, side, strength);
   ASSERT_TRUE(membraneStrength(t, loc, side, strength));
 }
 
@@ -109,7 +109,7 @@ TEST(Simulation, cloneNew)
   Cell::Coordinates loc6 = {1, 0, 1};
   Cell::Coordinates loc7 = {1, 2, 1};
 
-  sim->helperCellNew(tissue, loc1);
+  sim->cellNew(tissue, loc1, Cell::helperCell());
   sim->cloneNew(tissue, loc1, CellMembrane::up());
   
   ASSERT_TRUE(t->cells() == 2);
@@ -139,9 +139,118 @@ TEST(Simulation, cloneNew)
 }
 
 
-TEST(Simulation, infectionStart_FirstCellFail)
+TEST(Simulation, cloneCellsNew)
 {
-  ASSERT_TRUE(false);  
+  Simulation::Ptr sim = Simulation::SimulationNew("test");
+  string tissue = "tissue1";
+  Tissue::Ptr t = sim->tissueNew(tissue);
+
+  for (int i = 0; i < 10; i++) {
+    Cell::Coordinates loc = {0, 0, i};
+    sim->cellNew(tissue, loc, Cell::helperCell());
+  }
+  Cell::Ptr c = *(t->cellIter());
+  CellMembrane::Side side = CellMembrane::north();
+  Cell::HealthId health = c->health();
+  Cell::CellType ctype = c->cellType();
+
+  sim->cloneCellsNew(tissue, side);
+
+  for (int i = 0; i < 10; i++) {
+    for (int j = 0; j < 2; j++) {
+      Cell::Coordinates loc = {0, 0, i};
+      ASSERT_TRUE(cellExists(t, loc, ctype, health));
+    }
+  }
+
+}
+
+
+TEST(Simulation, infectionStart1)
+{
+  Simulation::Ptr sim = Simulation::SimulationNew("test");
+  string tissue = "tissue1";
+  Tissue::Ptr t = sim->tissueNew(tissue);
+  Cell::Coordinates loc = {0, 0, 0};
+  sim->cellNew(tissue, loc, Cell::cytotoxicCell());
+  Cell::Ptr c = *(t->cellIter(loc));
+  AntibodyStrength strength = AntibodyStrength(20);
+  CellMembrane::Side side = CellMembrane::up();
+  CellMembrane::Ptr m = *(c->membraneIterConst(side));
+  m->antibodyStrengthIs(strength);
+
+  sim->infectionStart(tissue, loc, side, strength);
+  c = *(t->cellIter(loc));
+  ASSERT_TRUE(c->health() == Cell::healthy());
+
+  strength = AntibodyStrength(15);
+  sim->infectionStart(tissue, loc, side, strength);
+  ASSERT_TRUE(c->health() == Cell::healthy());
+
+  strength = AntibodyStrength(25);
+  sim->infectionStart(tissue, loc, side, strength);
+  ASSERT_TRUE(c->health() == Cell::infected());
+}
+
+TEST(Simulation, infectionStart2)
+{
+  Simulation::Ptr sim = Simulation::SimulationNew("test");
+  string tissue = "tissue1";
+  Tissue::Ptr t = sim->tissueNew(tissue);
+
+  for (int i = 0; i < 10; i++) {
+    Cell::Coordinates loc = {0, 0, i};
+    sim->cellNew(tissue, loc, Cell::helperCell());
+  }
+  sim->infectedCellsDel(tissue);
+
+  Cell::Coordinates loc = {0, 0, 0};
+  CellMembrane::Side side = CellMembrane::down();
+  AntibodyStrength strength = AntibodyStrength(20);
+  sim->infectionStart(tissue, loc, side, strength);
+
+  for (int i = 0; i < 10; i++) {
+    Cell::Coordinates loc = {0, 0, i};
+    Cell::Ptr c = *(t->cellIter(loc));
+    ASSERT_TRUE(c->health() == Cell::infected());
+  }
+
+  sim->infectedCellsDel(tissue);
+  ASSERT_TRUE(t->cells() == 0);
+}
+
+TEST(Simulation, infectionStart3)
+{
+  Simulation::Ptr sim = Simulation::SimulationNew("test");
+  string tissue = "tissue1";
+  Tissue::Ptr t = sim->tissueNew(tissue);
+
+  for (int i = 0; i < 10; i++) {
+    Cell::Coordinates loc = {0, 0, i};
+    if (i == 5) {
+      sim->cellNew(tissue, loc, Cell::cytotoxicCell());
+    } else {
+      sim->cellNew(tissue, loc, Cell::helperCell());
+    }
+  }
+
+  Cell::Coordinates loc = {0, 0, 0};
+  CellMembrane::Side side = CellMembrane::down();
+  AntibodyStrength strength = AntibodyStrength(20);
+  sim->infectionStart(tissue, loc, side, strength);
+  
+  for (int i = 0; i < 10; i++) {
+    Cell::Coordinates loc = {0, 0, i};
+    Cell::Ptr c = *(t->cellIter(loc));
+    if (i < 5) 
+      ASSERT_TRUE(c->health() == Cell::infected());
+    else 
+      ASSERT_TRUE(c->health() == Cell::healthy());
+  }
+
+  sim->infectedCellsDel(tissue);
+  ASSERT_TRUE(t->cells() == 5);
+
 }
 
 TEST(Simulation, infectedCellsDel)
@@ -151,8 +260,8 @@ TEST(Simulation, infectedCellsDel)
   Tissue::Ptr t = sim->tissueNew(tissue);
   Cell::Coordinates loc1 = {1, 2, 3};
   Cell::Coordinates loc2 = {4, 5, 6};
-  sim->helperCellNew(tissue, loc1);
-  sim->helperCellNew(tissue, loc2);
+  sim->cellNew(tissue, loc1, Cell::helperCell());
+  sim->cellNew(tissue, loc2, Cell::helperCell());
   Cell::Ptr c1;
   Cell::Ptr c2;
 

@@ -22,13 +22,13 @@ int main(int argc, const char* argv[]) {
   Fwk::String textLine;
   while(!infile.eof()){
     getline(infile, textLine);
-    try {
-      sim->parseCommand(textLine);
-    }
-    catch (...) {
-      cerr << "Excetion occurred while parseing command: [" << textLine << "]" 
-        << endl;
-    }
+    // try {
+      sim->commandIs(textLine);
+    // }
+    // catch (...) {
+    //   cerr << "Excetion occurred while parseing command: [" << textLine << "]" 
+    //     << endl;
+    // }
   }
   return 0;
 }

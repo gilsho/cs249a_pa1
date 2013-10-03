@@ -1,1 +1,2 @@
+clear
 cd .. && make && cd unit-tests && make all && UnitTest
