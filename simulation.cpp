@@ -147,7 +147,7 @@ void Simulation::infectionStart(Fwk::String _tissue, Cell::Coordinates loc,
 void Simulation::stats(Fwk::String _tissue, U32 attempts, S32 difference, 
                        U32 path)
 {
-  cout << "infected|attempts|diff|cyto|helper|volume|path" << endl;
+  // cout << "infected|attempts|diff|cyto|helper|volume|path" << endl;
   cout << infectedCells(_tissue) << " " << attempts << " " 
     << difference << " " << cytotoxicCells_ << " " 
     << helperCells_ << " " << infectionVolume(_tissue) << " " 
@@ -358,6 +358,14 @@ U32 Simulation::infectionVolume(Fwk::String _tissue)
   assertValidPtr(t);
 
   Tissue::CellIterator it = t->cellIter();
+
+  // Loop to find first infected cell
+  for (++it; it; ++it) {
+    Cell::Ptr c = *it;
+    assertValidPtr(c);
+    if (c->health() == Cell::infected())
+      break;
+  }
   if (!it)
     return 0;
 
@@ -367,6 +375,10 @@ U32 Simulation::infectionVolume(Fwk::String _tissue)
   for (++it; it; ++it) {
     Cell::Ptr c = *it;
     assertValidPtr(c);
+
+    if (c->health() == Cell::healthy())
+      continue;
+
     Cell::Coordinates loc = c->location();
 
     if (loc.x < minLoc.x)
