@@ -3,6 +3,7 @@
 #include "simulation.h"
 
 using namespace std;
+using namespace boost;
 
 /*
   The main takes in one input, the file name with the rules.
@@ -22,13 +23,13 @@ int main(int argc, const char* argv[]) {
   Fwk::String textLine;
   while(!infile.eof()){
     getline(infile, textLine);
-    // try {
+    try {
       sim->commandIs(textLine);
-    // }
-    // catch (...) {
-    //   cerr << "Excetion occurred while parseing command: [" << textLine << "]" 
-    //     << endl;
-    // }
+    }
+    catch (...) {
+      cerr << "Excetion occurred while parseing command: [" << textLine << "]" 
+        << endl;
+    }
   }
   return 0;
 }

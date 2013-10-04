@@ -67,8 +67,8 @@ protected:
 
 	Simulation(Fwk::String _name);
 	~Simulation() {}
-	Cell::Coordinates coordinateIs(tokenizer<>::iterator token);
-	CellMembrane::Side sideIs(tokenizer<>::iterator token);
+	Cell::Coordinates coordinateIs(tokenizer<char_separator<char> >::iterator token);
+	CellMembrane::Side sideIs(tokenizer<char_separator<char> >::iterator token);
 	Cell::Coordinates coordinateShifted(Cell::Coordinates loc, 
                                      CellMembrane::Side side);
 	bool infectionSpreadTo(Cell::Ptr c, CellMembrane::Side side, 

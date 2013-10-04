@@ -13,6 +13,13 @@ void assertValidPtr(Fwk::Ptr<T> p) {
   }
 }
 
+string CoordToStr(Cell::Coordinates loc) 
+{
+  return "(" + lexical_cast<string>(loc.x) + ", " +
+               lexical_cast<string>(loc.y) + ", " +
+               lexical_cast<string>(loc.z) + ")";
+}
+
 void Simulation::TissueReactor::onCellNew(Cell::Ptr c)
 {
   CellMembrane::Ptr m;
@@ -252,6 +259,7 @@ void Simulation::cloneNew(Fwk::String _tissue, Cell::Coordinates loc,
   Cell::Ptr c = *(t->cellIter(loc));
   Cell::CellType ctype = c->cellType();
   Cell::Coordinates cloneLoc = coordinateShifted(loc, side); 
+  // cout << CoordToStr(cloneLoc) << endl;
   Cell::Ptr clone = cellNew(_tissue, cloneLoc, ctype);
   
   clone->healthIs(c->health());
@@ -315,21 +323,25 @@ void Simulation::cloneCellsNew(Fwk::String _tissue, CellMembrane::Side side)
   while (!cellsQueue.empty()) {
     Cell::Coordinates loc = cellsQueue.front();
     cellsQueue.pop();
-    cloneNew(_tissue, loc, side);
+    try {
+      cloneNew(_tissue, loc, side);
+    } catch(...) {
+      //do nothing
+    }
   }
 }
 
 
-Cell::Coordinates Simulation::coordinateIs(tokenizer<>::iterator token)
+Cell::Coordinates Simulation::coordinateIs(tokenizer<char_separator<char> >::iterator token)
 {
   Cell::Coordinates loc;
-  loc.x = lexical_cast<int>(*token++);
-  loc.y = lexical_cast<int>(*token++);
-  loc.z = lexical_cast<int>(*token);
+  loc.x = lexical_cast<S32>(*token++);
+  loc.y = lexical_cast<S32>(*token++);
+  loc.z = lexical_cast<S32>(*token);
   return loc;
 }
 
-CellMembrane::Side Simulation::sideIs(tokenizer<>::iterator token)
+CellMembrane::Side Simulation::sideIs(tokenizer<char_separator<char> >::iterator token)
 {
   if (*token == "north")
     return CellMembrane::north_;
@@ -421,8 +433,9 @@ void Simulation::commandIs(Fwk::String textLine)
   if (textLine == "" || textLine[0] == '#')
     return;
 
-  tokenizer<> tokenizedLine(textLine);
-  tokenizer<>::iterator token=tokenizedLine.begin(); 
+  char_separator<char> sep(" ");
+  tokenizer<char_separator<char> > tokenizedLine(textLine, sep);
+  tokenizer<char_separator<char> >::iterator token=tokenizedLine.begin(); 
 
   if (*token == "Tissue") {
     token++;
