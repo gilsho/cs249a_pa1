@@ -1,6 +1,5 @@
 CPPFLAGS = -I.
-CXXFLAGS = -Wall -g
-CXX = g++-4.6
+CXXFLAGS = -Wall -g -fpermissive
 
 OBJECTS = Tissue.o main.o simulation.o
 LIBS = fwk/BaseCollection.o fwk/BaseNotifiee.o fwk/Exception.o

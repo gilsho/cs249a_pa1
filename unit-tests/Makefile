@@ -1,6 +1,6 @@
 # This is a Makefile for the tests for the example 249a project. It is meant to
-# show how Google tests are configured. This Makefile is verbose for the 
-# purpose of showing how all the pieces fit together. 
+# show how Google tests are configured. This Makefile is verbose for the
+# purpose of showing how all the pieces fit together.
 
 # #################
 # Source location Configuration
@@ -24,7 +24,7 @@ MAIN_FILES += simulation Tissue
 # The objects corresponding to the tested files.
 MAIN_OBJ_PATH = $(addsuffix .o, $(addprefix $(SRC_PATH), $(MAIN_FILES)))
 
-LIBS = $(SRC_PATH)fwk/BaseCollection.o $(SRC_PATH)fwk/BaseNotifiee.o $(SRC_PATH)fwk/Exception.o 
+LIBS = $(SRC_PATH)fwk/BaseCollection.o $(SRC_PATH)fwk/BaseNotifiee.o $(SRC_PATH)fwk/Exception.o
 
 # ##################
 # Compiler parameters.
@@ -47,14 +47,14 @@ OBJS = $(addsuffix .o, $(FILES))
 # ##################
 # Targets for each file you are testing.
 # ##################
-SimulationTest: SimulationTest.cpp $(SRC_PATH)/Simulation.cpp $(SRC_PATH)/Simulation.h $(SRC_PATH)/Simulation.o
+SimulationTest: SimulationTest.cpp $(SRC_PATH)/simulation.cpp $(SRC_PATH)/simulation.h $(SRC_PATH)/simulation.o
 	$(CXX) $(PREPROCESSOR_FLAGS) $(COMPILER_FLAGS) -c SimulationTest.cpp
 
 # ##################
 # Main Suite
 # ##################
 
-# This creates the final binary by pulling in each individual test defined 
+# This creates the final binary by pulling in each individual test defined
 # above. It links the main google test library which has a main function that
 # pulls in our tests and runs them.
 main: $(FILES)
@@ -64,3 +64,4 @@ all: main
 
 clean:
 	rm -rf *.o UnitTest
+
