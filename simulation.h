@@ -73,7 +73,7 @@ protected:
 	CellMembrane::Side oppositeSide(CellMembrane::Side side);
 	void stats(U32 attempts, S32 difference, U32 path);
 
-	Tissue::Ptr t;
+	Tissue::Ptr tissue_;
 
 	U32 infectionVolume();
 	U32 infectedCells(); 

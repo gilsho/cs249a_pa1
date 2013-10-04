@@ -55,17 +55,13 @@ void Simulation::TissueReactor::onCellDel(Cell::Ptr c)
   }
 }
 
-/*
-Create a new tissue named "name". Quoted names are not accepted and therefore 
-names cannot contain any whitespace. NOTE: The tissue name WILL NOT be any of 
-the commands, i.e. there will not be a tissue named "tissueNew".
-*/
+// create new simulation object, wrapping a tissue_
 Simulation::Simulation(Fwk::String _name) : 
   Fwk::NamedInterface("sim" + _name) 
 {
-  t = Tissue::TissueNew(_name);
-  TissueReactor::Ptr r = TissueReactor::TissueReactorIs(t.ptr());
-  r->notifierIs(t);
+  tissue_ = Tissue::TissueNew(_name);
+  TissueReactor::Ptr r = TissueReactor::TissueReactorIs(tissue_.ptr());
+  r->notifierIs(tissue_);
   ((TissueReactor *)r.ptr())->psim = this;
   helperCells_ = 0;
   cytotoxicCells_ = 0;
@@ -73,11 +69,11 @@ Simulation::Simulation(Fwk::String _name) :
 
 Tissue::Ptr Simulation::tissue()
 {
-  return t;
+  return tissue_;
 }
 
 /*
-Create a new healthy CytotoxicCell in "tissue" at location "loc". In case an 
+Create a new healthy CytotoxicCell at location "loc". In case an 
 exception is thrown (ex. a cell already exists at location), your program 
 should catch the exception and, if you wish, use some logging mechanism to 
 report it. In any case, your simulation should continue running as if this 
@@ -88,12 +84,12 @@ Cell::Ptr Simulation::cellNew(Cell::Coordinates loc,
   Cell::CellType ctype)
 {
   // raise exception if cell already exists
-  Cell::Ptr c = *(t->cellIter(loc));
+  Cell::Ptr c = *(tissue_->cellIter(loc));
   if (c)
     throw "trying to create cell in non-empty location";
 
-  c = Cell::CellNew(loc, t.ptr(), ctype);
-  t->cellIs(c);
+  c = Cell::CellNew(loc, tissue_.ptr(), ctype);
+  tissue_->cellIs(c);
   
   return c;
 }
@@ -142,7 +138,7 @@ void Simulation::infectionStart(Cell::Coordinates loc,
   S32 difference = 0;
   U32 path = 0;
 
-  Cell::Ptr rootCell = *(t->cellIter(loc)); 
+  Cell::Ptr rootCell = *(tissue_->cellIter(loc)); 
   if (!rootCell) {
     stats(attempts, difference, path);
     return;
@@ -203,6 +199,8 @@ void Simulation::infectionStart(Cell::Coordinates loc,
   stats(attempts, difference, path);
 }
 
+// spreads an infection to cell from specific side. updates statistics
+// as well
 bool Simulation::infectionSpreadTo(Cell::Ptr c, CellMembrane::Side side, 
                                    AntibodyStrength attack, 
                                    S32& difference,
@@ -221,6 +219,7 @@ bool Simulation::infectionSpreadTo(Cell::Ptr c, CellMembrane::Side side,
   return false;
 }
 
+// print out statistics about an infection round
 void Simulation::stats(U32 attempts, S32 difference, 
                        U32 path)
 {
@@ -230,6 +229,7 @@ void Simulation::stats(U32 attempts, S32 difference,
     << path << endl;
 }
 
+//returns the neighbor of a cell in a particular direction
 Cell::Ptr Simulation::neighbor(Cell::Ptr c, CellMembrane::Side side)
 {
   Cell::Coordinates loc = c->location();
@@ -253,11 +253,14 @@ Cell::Ptr Simulation::neighbor(Cell::Ptr c, CellMembrane::Side side)
     loc.z--;
 
   else 
-    throw "invalid cell side";
+    return NULL;
 
-  return (*t->cellIter(loc));
+
+  return (*tissue_->cellIter(loc));
 }
 
+// returns the inverted side. north becomes south, east becomes west, 
+// and so forth
 CellMembrane::Side Simulation::oppositeSide(CellMembrane::Side side) 
 {
   if (side == CellMembrane::north())
@@ -278,18 +281,16 @@ CellMembrane::Side Simulation::oppositeSide(CellMembrane::Side side)
   if (side == CellMembrane::down()) 
     return CellMembrane::up();
 
-  throw "invalid cell side";
+  return side;
 }
 
 
-/*
-Remove all infected cells from "_tissue".
-*/
+// Remove all infected cells from "_tissue_".
 void Simulation::infectedCellsDel()
 {
   queue<Fwk::String> cellsQueue;
   
-  for (Tissue::CellIterator it = t->cellIter(); it; ++it) {
+  for (Tissue::CellIterator it = tissue_->cellIter(); it; ++it) {
     Cell::Ptr c = *it;
     if (c->health() == Cell::infected()) {
       cellsQueue.push(c->name());
@@ -299,13 +300,13 @@ void Simulation::infectedCellsDel()
   while (!cellsQueue.empty()) {
     Fwk::String s = cellsQueue.front();
     cellsQueue.pop();
-    t->cellDel(s);
+    tissue_->cellDel(s);
   }
 }
 
 /*
-Clones cell at location "loc" and places the new cell "side" of "loc" (x,y+1,z) 
-in "_tissue". Like the other cell creation commands, the simulation should 
+Clones cell at location "loc" and places the new cell "side" of "loc"
+Like the other cell creation commands, the simulation should 
 continue running despite any exception that may be thrown.
 */
 
@@ -313,7 +314,7 @@ void Simulation::cloneNew(Cell::Coordinates loc,
               CellMembrane::Side side)
 {
 
-  Cell::Ptr c = *(t->cellIter(loc));
+  Cell::Ptr c = *(tissue_->cellIter(loc));
   Cell::CellType ctype = c->cellType();
   Cell::Coordinates cloneLoc = coordinateShifted(loc, side); 
   // cout << CoordToStr(cloneLoc) << endl;
@@ -328,6 +329,7 @@ void Simulation::cloneNew(Cell::Coordinates loc,
   }
 }
 
+// returns a shifted version of given coordinate in the specied side
 Cell::Coordinates Simulation::coordinateShifted(Cell::Coordinates loc, 
                                                CellMembrane::Side side)
 {
@@ -348,10 +350,11 @@ Cell::Coordinates Simulation::coordinateShifted(Cell::Coordinates loc,
   return shiftLoc;
 }
 
+// sets the antibody stength of a cell in the simulation tissue_
 void Simulation::antibodyStrengthIs(Cell::Coordinates loc,
                          CellMembrane::Side side, AntibodyStrength strength)
 {
-  Cell::Ptr c = *(t->cellIter(loc));
+  Cell::Ptr c = *(tissue_->cellIter(loc));
   if (!c) 
     cellNew(loc, DEFAULT_CELL_TYPE);
   CellMembrane::Ptr m = *(c->membraneIterConst(side));
@@ -360,15 +363,15 @@ void Simulation::antibodyStrengthIs(Cell::Coordinates loc,
 }
 
 /*
-Tissue Tissue1 cloneCellsNew west — Clones all cells in "_tissue" to the "loc"
+Tissue Tissue1 cloneCellsNew west — Clones all cells to the "loc"
 direction. Equivalent to writing Cell x y z cloneNew "loc" for each cell in
-the _tissue. If any single cell throws an exception, you should continue the 
+the tissue_. If any single cell throws an exception, you should continue the 
 simulation and clone the remaining cells.
 */
 void Simulation::cloneCellsNew(CellMembrane::Side side) 
 {
   queue<Cell::Coordinates> cellsQueue;
-  for (Tissue::CellIterator it = t->cellIter(); it; ++it) {
+  for (Tissue::CellIterator it = tissue_->cellIter(); it; ++it) {
     Cell::Ptr c = *it;
     if (c)
       cellsQueue.push(c->location());
@@ -386,9 +389,10 @@ void Simulation::cloneCellsNew(CellMembrane::Side side)
 }
 
 
+// Calculates the bounding box around infected cells
 U32 Simulation::infectionVolume()
 {
-  Tissue::CellIterator it = t->cellIter();
+  Tissue::CellIterator it = tissue_->cellIter();
 
   // Loop to find first infected cell
   for (; it; ++it) {
@@ -429,10 +433,11 @@ U32 Simulation::infectionVolume()
           (maxLoc.z - minLoc.z + 1);
 }
 
+// returns the total number of infected cells in tissue_
 U32 Simulation::infectedCells() 
 { 
   U32 count = 0;
-  for (Tissue::CellIterator it = t->cellIter(); it; ++it) {
+  for (Tissue::CellIterator it = tissue_->cellIter(); it; ++it) {
     Cell::Ptr c = *it;
     if (c->health() == Cell::infected()) {
       count++;
