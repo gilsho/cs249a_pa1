@@ -11,6 +11,7 @@
 using namespace std;
 using namespace boost;
 
+#define DEFAULT_CELL_TYPE (Cell::helperCell())
 
 class Simulation : public Fwk::NamedInterface
 {

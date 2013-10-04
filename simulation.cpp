@@ -98,7 +98,6 @@ Cell::Ptr Simulation::cellNew(Fwk::String _tissue, Cell::Coordinates loc,
     throw "trying to create cell in non-empty location";
 
   c = Cell::CellNew(loc, t.ptr(), ctype);
-  assertValidPtr(c);
   t->cellIs(c);
   
   return c;
@@ -153,7 +152,10 @@ void Simulation::infectionStart(Fwk::String _tissue, Cell::Coordinates loc,
   assertValidPtr(t);
 
   Cell::Ptr rootCell = *(t->cellIter(loc)); 
-  assertValidPtr(rootCell);
+  if (!rootCell) {
+    stats(_tissue, attempts, difference, path);
+    return;
+  }
 
   if (!infectionSpreadTo(rootCell, side, strength, difference, attempts)) {
     stats(_tissue, attempts, difference, path);
@@ -301,7 +303,6 @@ void Simulation::infectedCellsDel(Fwk::String _tissue)
   
   for (Tissue::CellIterator it = t->cellIter(); it; ++it) {
     Cell::Ptr c = *it;
-    assertValidPtr(c);
     if (c->health() == Cell::infected()) {
       cellsQueue.push(c->name());
     }
@@ -367,7 +368,8 @@ void Simulation::antibodyStrengthIs(Fwk::String _tissue, Cell::Coordinates loc,
   Tissue::Ptr t = tissues_[_tissue];
   assertValidPtr(t);
   Cell::Ptr c = *(t->cellIter(loc));
-  assertValidPtr(c);
+  if (!c)
+    cellNew(_tissue, loc, DEFAULT_CELL_TYPE);
   CellMembrane::Ptr m = *(c->membraneIterConst(side));
   assertValidPtr(m);
   m->antibodyStrengthIs(strength);
@@ -386,8 +388,8 @@ void Simulation::cloneCellsNew(Fwk::String _tissue, CellMembrane::Side side)
   queue<Cell::Coordinates> cellsQueue;
   for (Tissue::CellIterator it = t->cellIter(); it; ++it) {
     Cell::Ptr c = *it;
-    assertValidPtr(c);
-    cellsQueue.push(c->location());
+    if (c)
+      cellsQueue.push(c->location());
   }
 
   while (!cellsQueue.empty()) {
@@ -444,7 +446,6 @@ U32 Simulation::infectionVolume(Fwk::String _tissue)
   // Loop to find first infected cell
   for (++it; it; ++it) {
     Cell::Ptr c = *it;
-    assertValidPtr(c);
     if (c->health() == Cell::infected())
       break;
   }
@@ -456,7 +457,6 @@ U32 Simulation::infectionVolume(Fwk::String _tissue)
 
   for (++it; it; ++it) {
     Cell::Ptr c = *it;
-    assertValidPtr(c);
 
     if (c->health() == Cell::healthy())
       continue;
@@ -490,7 +490,6 @@ U32 Simulation::infectedCells(Fwk::String _tissue)
   U32 count = 0;
   for (Tissue::CellIterator it = t->cellIter(); it; ++it) {
     Cell::Ptr c = *it;
-    assertValidPtr(c);
     if (c->health() == Cell::infected()) {
       count++;
     }
