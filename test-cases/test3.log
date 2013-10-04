@@ -1,0 +1,173 @@
+#Creating Tissue
+Tissue tissueNew Tissue1
+
+#Creating cell in tissue1 in location 0 0 0
+Tissue Tissue1 helperCellNew 0 0 0
+
+Cell Tissue1 0 0 0 membrane south antibodyStrengthIs 100
+Cell Tissue1 0 0 0 membrane north antibodyStrengthIs 100
+
+Cell Tissue1 0 0 0 cloneNew north
+Cell Tissue1 0 1 0 cloneNew north
+Cell Tissue1 0 2 0 cloneNew north
+Cell Tissue1 0 3 0 cloneNew north
+Cell Tissue1 0 4 0 cloneNew north
+
+Cell Tissue1 0 0 0 cloneNew south
+Cell Tissue1 0 -1 0 cloneNew south
+Cell Tissue1 0 -2 0 cloneNew south
+Cell Tissue1 0 -3 0 cloneNew south
+Cell Tissue1 0 -4 0 cloneNew south
+
+Tissue Tissue1 cloneCellsNew west
+Tissue Tissue1 cloneCellsNew west
+Tissue Tissue1 cloneCellsNew west
+Tissue Tissue1 cloneCellsNew west
+Tissue Tissue1 cloneCellsNew west
+
+Tissue Tissue1 cloneCellsNew east
+Tissue Tissue1 cloneCellsNew east
+Tissue Tissue1 cloneCellsNew east
+Tissue Tissue1 cloneCellsNew east
+Tissue Tissue1 cloneCellsNew east
+
+Tissue Tissue1 infectionStartLocationIs 5 5 0 east 100
+
+Tissue Tissue1 infectedCellsDel
+
+Tissue Tissue1 infectionStartLocationIs 0 3 0 west 100
+
+Tissue Tissue1 infectedCellsDel
+
+Tissue Tissue1 infectionStartLocationIs -5 -5 0 down 100
+
+Tissue Tissue1 infectedCellsDel
+
+Tissue Tissue1 infectionStartLocationIs -3 -3 0 east 100
+
+Tissue Tissue1 cloneCellsNew up
+
+Tissue Tissue1 infectionStartLocationIs 0 0 0 west 100
+
+Tissue Tissue1 infectedCellsDel
+
+# Create second tissue
+Tissue tissueNew Tissue2
+
+Tissue Tissue2 cytotoxicCellNew 0 0 0
+Cell Tissue2 0 0 0 membrane east antibodyStrengthIs 80
+Cell Tissue2 0 0 0 membrane west antibodyStrengthIs 80
+Cell Tissue2 0 0 0 membrane up antibodyStrengthIs 50
+Cell Tissue2 0 0 0 membrane down antibodyStrengthIs 20
+
+Cell Tissue2 0 0 0 cloneNew north
+Cell Tissue2 0 1 0 cloneNew north
+Cell Tissue2 0 2 0 cloneNew north
+Cell Tissue2 0 3 0 cloneNew north
+Cell Tissue2 0 4 0 cloneNew north
+Cell Tissue2 0 5 0 cloneNew north
+Cell Tissue2 0 6 0 cloneNew north
+Cell Tissue2 0 7 0 cloneNew north
+Cell Tissue2 0 8 0 cloneNew north
+Cell Tissue2 0 9 0 cloneNew north
+Cell Tissue2 0 10 0 cloneNew north
+Cell Tissue2 0 11 0 cloneNew north
+Cell Tissue2 0 12 0 cloneNew north
+Cell Tissue2 0 13 0 cloneNew north
+Cell Tissue2 0 14 0 cloneNew north
+Cell Tissue2 0 15 0 cloneNew north
+Cell Tissue2 0 16 0 cloneNew north
+Cell Tissue2 0 17 0 cloneNew north
+Cell Tissue2 0 18 0 cloneNew north
+Cell Tissue2 0 19 0 cloneNew north
+Cell Tissue2 0 20 0 cloneNew north
+Cell Tissue2 0 21 0 cloneNew north
+Cell Tissue2 0 22 0 cloneNew north
+Cell Tissue2 0 23 0 cloneNew north
+Cell Tissue2 0 24 0 cloneNew north
+Cell Tissue2 0 25 0 cloneNew north
+Cell Tissue2 0 26 0 cloneNew north
+Cell Tissue2 0 27 0 cloneNew north
+Cell Tissue2 0 28 0 cloneNew north
+Cell Tissue2 0 29 0 cloneNew north
+Cell Tissue2 0 30 0 cloneNew north
+Cell Tissue2 0 31 0 cloneNew north
+Cell Tissue2 0 32 0 cloneNew north
+Cell Tissue2 0 33 0 cloneNew north
+Cell Tissue2 0 34 0 cloneNew north
+Cell Tissue2 0 35 0 cloneNew north
+Cell Tissue2 0 36 0 cloneNew north
+Cell Tissue2 0 37 0 cloneNew north
+Cell Tissue2 0 38 0 cloneNew north
+Cell Tissue2 0 39 0 cloneNew north
+Cell Tissue2 0 40 0 cloneNew north
+Cell Tissue2 0 41 0 cloneNew north
+Cell Tissue2 0 42 0 cloneNew north
+Cell Tissue2 0 43 0 cloneNew north
+Cell Tissue2 0 44 0 cloneNew north
+Cell Tissue2 0 45 0 cloneNew north
+Cell Tissue2 0 46 0 cloneNew north
+Cell Tissue2 0 47 0 cloneNew north
+Cell Tissue2 0 48 0 cloneNew north
+Cell Tissue2 0 49 0 cloneNew north
+
+# Clone until we get a rectangular volume of cells
+Tissue Tissue2 cloneCellsNew up
+Tissue Tissue2 cloneCellsNew west
+Tissue Tissue2 cloneCellsNew up
+Tissue Tissue2 cloneCellsNew west
+Tissue Tissue2 cloneCellsNew up
+Tissue Tissue2 cloneCellsNew west
+Tissue Tissue2 cloneCellsNew up
+Tissue Tissue2 cloneCellsNew west
+
+# Infections
+
+# Infection 1
+# No cell in start location
+# Should output
+# 0 0 0 1275 0 0 0
+Tissue Tissue2 infectionStartLocationIs 5 0 -4 east 100
+
+# Infection 2
+# Tissue doesn't exist
+# Should output
+# 0 0 0 0 0 0 0
+#Tissue NonExistentTissue infectionStartLocationIs 0 0 0 south 1
+
+# Infection 3
+# Infection fails at starting location
+# Strength diff should be -10
+Tissue Tissue2 infectionStartLocationIs 0 0 0 down 10
+
+# Infection 4
+# Infection fails at starting location
+# Strength diff should be -25
+Tissue Tissue2 infectionStartLocationIs -3 20 4 up 25
+
+# Infection 5
+# Should infect the z-column from 0 0 0 to 0 0 4
+Tissue Tissue2 infectionStartLocationIs 0 0 0 down 30
+
+# Infection 6
+# Should infect the z-column from -4 0 0 to -4 0 4
+# But this time it starts from up membrane of -4 0 0
+Tissue Tissue2 infectionStartLocationIs -4 0 0 up 60
+
+# Clears the 10 infected cells
+Tissue Tissue2 infectedCellsDel
+
+# Infection 7
+Tissue Tissue2 infectionStartLocationIs 0 20 0 east 90
+
+# Clears the 25 infected cells
+Tissue Tissue2 infectedCellsDel
+
+# Set up for infection 8
+Tissue Tissue2 helperCellNew -4 20 4
+Cell Tissue2 -4 21 4 membrane south antibodyStrengthIs 0
+Tissue Tissue2 helperCellNew -4 20 5
+
+# Infection 8
+Tissue Tissue2 infectionStartLocationIs 0 19 0 east 90
+

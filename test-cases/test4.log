@@ -1,0 +1,241 @@
+#Creating Tissues
+Tissue tissueNew Tissue1
+Tissue tissueNew Tissue2
+Tissue tissueNew TissueDummy
+
+#Creating cell in tissue1 in location 0 0 0
+Tissue Tissue1 helperCellNew -49 -49 -49
+Tissue Tissue1 helperCellNew -48 -49 -49
+Tissue Tissue1 helperCellNew -47 -49 -49
+Tissue Tissue1 helperCellNew -46 -49 -49
+Tissue Tissue1 helperCellNew -45 -49 -49
+Tissue Tissue1 helperCellNew -44 -49 -49
+Tissue Tissue1 helperCellNew -43 -49 -49
+Tissue Tissue1 helperCellNew -42 -49 -49
+Tissue Tissue1 helperCellNew -41 -49 -49
+Tissue Tissue1 helperCellNew -40 -49 -49
+Tissue Tissue1 helperCellNew -39 -49 -49
+Tissue Tissue1 helperCellNew -38 -49 -49
+Tissue Tissue1 cytotoxicCellNew -37 -49 -49
+Tissue Tissue1 cytotoxicCellNew -36 -49 -49
+Tissue Tissue1 helperCellNew -35 -49 -49
+Tissue Tissue1 helperCellNew -34 -49 -49
+Tissue Tissue1 helperCellNew -33 -49 -49
+Tissue Tissue1 helperCellNew -32 -49 -49
+Tissue Tissue1 helperCellNew -31 -49 -49
+Tissue Tissue1 helperCellNew -30 -49 -49
+Tissue Tissue1 helperCellNew -29 -49 -49
+Tissue Tissue1 helperCellNew -28 -49 -49
+Tissue Tissue1 helperCellNew -27 -49 -49
+Tissue Tissue1 helperCellNew -26 -49 -49
+Tissue Tissue1 helperCellNew -25 -49 -49
+Tissue Tissue1 helperCellNew -24 -49 -49
+Tissue Tissue1 helperCellNew -23 -49 -49
+Tissue Tissue1 helperCellNew -22 -49 -49
+Tissue Tissue1 helperCellNew -21 -49 -49
+Tissue Tissue1 helperCellNew -20 -49 -49
+Tissue Tissue1 helperCellNew -19 -49 -49
+Tissue Tissue1 helperCellNew -18 -49 -49
+Tissue Tissue1 helperCellNew -17 -49 -49
+Tissue Tissue1 helperCellNew -16 -49 -49
+Tissue Tissue1 helperCellNew -15 -49 -49
+Tissue Tissue1 helperCellNew -14 -49 -49
+Tissue Tissue1 helperCellNew -13 -49 -49
+Tissue Tissue1 helperCellNew -12 -49 -49
+Tissue Tissue1 helperCellNew -11 -49 -49
+Tissue Tissue1 helperCellNew -10 -49 -49
+Tissue Tissue1 helperCellNew -9 -49 -49
+Tissue Tissue1 cytotoxicCellNew -8 -49 -49
+Tissue Tissue1 cytotoxicCellNew -7 -49 -49
+Tissue Tissue1 helperCellNew -6 -49 -49
+Tissue Tissue1 helperCellNew -5 -49 -49
+Tissue Tissue1 helperCellNew -4 -49 -49
+Tissue Tissue1 helperCellNew -3 -49 -49
+Tissue Tissue1 helperCellNew -2 -49 -49
+Tissue Tissue1 helperCellNew -1 -49 -49
+Tissue Tissue1 helperCellNew 0 -49 -49
+Tissue Tissue1 helperCellNew 1 -49 -49
+Tissue Tissue1 helperCellNew 2 -49 -49
+Tissue Tissue1 helperCellNew 3 -49 -49
+Tissue Tissue1 helperCellNew 4 -49 -49
+Tissue Tissue1 helperCellNew 5 -49 -49
+Tissue Tissue1 helperCellNew 6 -49 -49
+Tissue Tissue1 helperCellNew 7 -49 -49
+Tissue Tissue1 helperCellNew 8 -49 -49
+Tissue Tissue1 helperCellNew 9 -49 -49
+Tissue Tissue1 helperCellNew 10 -49 -49
+Tissue Tissue1 helperCellNew 11 -49 -49
+Tissue Tissue1 helperCellNew 12 -49 -49
+Tissue Tissue1 helperCellNew 13 -49 -49
+Tissue Tissue1 helperCellNew 14 -49 -49
+Tissue Tissue1 helperCellNew 15 -49 -49
+Tissue Tissue1 helperCellNew 16 -49 -49
+Tissue Tissue1 helperCellNew 17 -49 -49
+Tissue Tissue1 helperCellNew 18 -49 -49
+Tissue Tissue1 helperCellNew 19 -49 -49
+Tissue Tissue1 helperCellNew 20 -49 -49
+Tissue Tissue1 helperCellNew 21 -49 -49
+Tissue Tissue1 helperCellNew 22 -49 -49
+Tissue Tissue1 helperCellNew 23 -49 -49
+Tissue Tissue1 helperCellNew 24 -49 -49
+Tissue Tissue1 helperCellNew 25 -49 -49
+Tissue Tissue1 helperCellNew 26 -49 -49
+Tissue Tissue1 helperCellNew 27 -49 -49
+Tissue Tissue1 helperCellNew 28 -49 -49
+Tissue Tissue1 helperCellNew 29 -49 -49
+Tissue Tissue1 helperCellNew 30 -49 -49
+Tissue Tissue1 helperCellNew 31 -49 -49
+Tissue Tissue1 helperCellNew 32 -49 -49
+Tissue Tissue1 helperCellNew 33 -49 -49
+Tissue Tissue1 helperCellNew 34 -49 -49
+Tissue Tissue1 helperCellNew 35 -49 -49
+Tissue Tissue1 helperCellNew 36 -49 -49
+Tissue Tissue1 helperCellNew 37 -49 -49
+Tissue Tissue1 helperCellNew 38 -49 -49
+Tissue Tissue1 helperCellNew 39 -49 -49
+Tissue Tissue1 helperCellNew 40 -49 -49
+Tissue Tissue1 helperCellNew 41 -49 -49
+Tissue Tissue1 helperCellNew 42 -49 -49
+Tissue Tissue1 helperCellNew 43 -49 -49
+Tissue Tissue1 helperCellNew 44 -49 -49
+Tissue Tissue1 helperCellNew 45 -49 -49
+Tissue Tissue1 cytotoxicCellNew 46 -49 -49
+Tissue Tissue1 cytotoxicCellNew 47 -49 -49
+Tissue Tissue1 helperCellNew 48 -49 -49
+Tissue Tissue1 helperCellNew 49 -49 -49
+
+# Slightly weaker cytotoxic cells
+Cell Tissue1 46 -49 -49 membrane west antibodyStrengthIs 50
+Cell Tissue1 46 -49 -49 membrane south antibodyStrengthIs 50
+Cell Tissue1 46 -49 -49 membrane east antibodyStrengthIs 50
+Cell Tissue1 46 -49 -49 membrane north antibodyStrengthIs 50
+Cell Tissue1 46 -49 -49 membrane up antibodyStrengthIs 50
+Cell Tissue1 46 -49 -49 membrane down antibodyStrengthIs 50
+Cell Tissue1 47 -49 -49 membrane west antibodyStrengthIs 50
+Cell Tissue1 47 -49 -49 membrane south antibodyStrengthIs 50
+Cell Tissue1 47 -49 -49 membrane east antibodyStrengthIs 50
+Cell Tissue1 47 -49 -49 membrane north antibodyStrengthIs 50
+Cell Tissue1 47 -49 -49 membrane up antibodyStrengthIs 50
+Cell Tissue1 47 -49 -49 membrane down antibodyStrengthIs 50
+
+Tissue Tissue1 cloneCellsNew north
+Tissue Tissue1 cloneCellsNew north
+Tissue Tissue1 cloneCellsNew north
+Tissue Tissue1 cloneCellsNew north
+Tissue Tissue1 cloneCellsNew north
+Tissue Tissue1 cloneCellsNew north
+Tissue Tissue1 cloneCellsNew north
+Tissue Tissue1 cloneCellsNew north
+Tissue Tissue1 cloneCellsNew north
+Tissue Tissue1 cloneCellsNew north
+
+# Strong helper cell columns
+Cell Tissue1 -49 -49 -49 membrane south antibodyStrengthIs 60
+Cell Tissue1 -49 -49 -49 membrane north antibodyStrengthIs 60
+Cell Tissue1 -49 -49 -49 membrane west antibodyStrengthIs 60
+Cell Tissue1 -49 -49 -49 membrane east antibodyStrengthIs 60
+Cell Tissue1 -49 -49 -49 membrane up antibodyStrengthIs 60
+Cell Tissue1 -49 -49 -49 membrane down antibodyStrengthIs 60
+
+Cell Tissue1 -40 -45 -49 membrane south antibodyStrengthIs 60
+Cell Tissue1 -40 -45 -49 membrane north antibodyStrengthIs 60
+Cell Tissue1 -40 -45 -49 membrane west antibodyStrengthIs 60
+Cell Tissue1 -40 -45 -49 membrane east antibodyStrengthIs 60
+Cell Tissue1 -40 -45 -49 membrane up antibodyStrengthIs 60
+Cell Tissue1 -40 -45 -49 membrane down antibodyStrengthIs 60
+
+Cell Tissue1 -30 -42 -49 membrane south antibodyStrengthIs 80
+Cell Tissue1 -30 -42 -49 membrane north antibodyStrengthIs 80
+Cell Tissue1 -30 -42 -49 membrane west antibodyStrengthIs 80
+Cell Tissue1 -30 -42 -49 membrane east antibodyStrengthIs 80
+Cell Tissue1 -30 -42 -49 membrane up antibodyStrengthIs 80
+Cell Tissue1 -30 -42 -49 membrane down antibodyStrengthIs 80
+
+# Report no. of cells
+# 93 x 11 x 1 = 1023 helper cells
+# 6 x 11 x 1 = 66 cytotoxic cells
+Tissue Tissue1 infectionStartLocationIs -49 -49 -49 south 10
+
+Tissue Tissue1 cloneCellsNew up
+Tissue Tissue1 cloneCellsNew up
+Tissue Tissue1 cloneCellsNew up
+Tissue Tissue1 cloneCellsNew up
+Tissue Tissue1 cloneCellsNew up
+Tissue Tissue1 cloneCellsNew up
+Tissue Tissue1 cloneCellsNew up
+Tissue Tissue1 cloneCellsNew up
+Tissue Tissue1 cloneCellsNew up
+Tissue Tissue1 cloneCellsNew up
+
+# Report no. of cells
+# 93 x 11 x 11 = 11253 helper cells
+# 6 x 11 x 11 = 726 cytotoxic cells
+Tissue Tissue1 infectionStartLocationIs -49 -49 -49 south 10
+
+# Add a column of 16 helperCells next to cytotoxic cells
+Tissue Tissue1 helperCellNew 46 -38 -49
+Cell Tissue1 46 -38 -49 cloneNew up
+Cell Tissue1 46 -38 -48 cloneNew up
+Cell Tissue1 46 -38 -47 cloneNew up
+Cell Tissue1 46 -38 -46 cloneNew up
+Cell Tissue1 46 -38 -45 cloneNew up
+Cell Tissue1 46 -38 -44 cloneNew up
+Cell Tissue1 46 -38 -43 cloneNew up
+Cell Tissue1 46 -38 -42 cloneNew up
+Cell Tissue1 46 -38 -41 cloneNew up
+Cell Tissue1 46 -38 -40 cloneNew up
+Cell Tissue1 46 -38 -39 cloneNew up
+Cell Tissue1 46 -38 -38 cloneNew up
+Cell Tissue1 46 -38 -37 cloneNew up
+Cell Tissue1 46 -38 -36 cloneNew up
+Cell Tissue1 46 -38 -35 cloneNew up
+
+# Add 14  more helperCells
+Tissue Tissue1 helperCellNew 47 -38 -49
+Tissue Tissue1 helperCellNew 47 -38 -47
+Tissue Tissue1 helperCellNew 47 -38 -45
+Tissue Tissue1 helperCellNew 47 -38 -43
+Tissue Tissue1 helperCellNew 47 -38 -41
+# these 9 are connected
+Tissue Tissue1 helperCellNew 47 -38 -39
+Tissue Tissue1 helperCellNew 47 -38 -38
+Tissue Tissue1 helperCellNew 47 -37 -38
+Tissue Tissue1 helperCellNew 47 -36 -38
+Tissue Tissue1 helperCellNew 47 -35 -38
+Tissue Tissue1 helperCellNew 47 -34 -38
+Tissue Tissue1 helperCellNew 47 -33 -38
+Tissue Tissue1 helperCellNew 47 -32 -38
+Tissue Tissue1 helperCellNew 47 -31 -38
+
+
+# Report no. of cells
+# 93 x 11 x 11 + 30 = 11283 helper cells
+# 6 x 11 x 11 = 726 cytotoxic cells
+Tissue Tissue1 infectionStartLocationIs -49 -49 -49 south 10
+
+# Massive infection
+Tissue Tissue1 infectionStartLocationIs -38 -49 -49 up 59
+
+# Clear infected cells
+Tissue Tissue1 infectedCellsDel
+
+# Report no. of cells
+# 93 x 11 x 11 = 11253 helper cells
+# 6 x 11 x 11 = 726 cytotoxic cells
+Tissue Tissue1 infectionStartLocationIs -49 -49 -49 south 10
+
+# Another massive infection
+Tissue Tissue1 infectionStartLocationIs -20 -42 -45 south 79
+
+# A third massive infection
+Tissue Tissue1 infectionStartLocationIs -6 -49 -49 south 100
+
+# Clear infected cells
+Tissue Tissue1 infectedCellsDel
+
+# Report no. of cells
+# 93 x 11 x 11 = 11253 helper cells
+# 6 x 11 x 11 = 726 cytotoxic cells
+Tissue Tissue1 infectionStartLocationIs -49 -49 -49 south 10
+
+

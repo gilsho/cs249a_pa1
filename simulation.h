@@ -57,6 +57,8 @@ protected:
 	{ 
 		public:
 			virtual void onCellNew( Cell::Ptr );
+			virtual void onCellDel( Cell::Ptr );
+
 			static TissueReactor *TissueReactorIs(Tissue *t) {
 				return new TissueReactor(t);
 			}
@@ -72,7 +74,9 @@ protected:
 	Cell::Coordinates coordinateShifted(Cell::Coordinates loc, 
                                      CellMembrane::Side side);
 	bool infectionSpreadTo(Cell::Ptr c, CellMembrane::Side side, 
-												 AntibodyStrength strength, S32& difference);
+                                   AntibodyStrength attack, 
+                                   S32& difference,
+                                   U32& attempts);
 	Cell::Ptr neighbor(Tissue::Ptr t, Cell::Ptr c, CellMembrane::Side side);
 	CellMembrane::Side oppositeSide(CellMembrane::Side side);
 	void stats(Fwk::String _tissue, U32 attempts, S32 difference, U32 path);

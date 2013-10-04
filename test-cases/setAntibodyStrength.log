@@ -1,0 +1,13 @@
+#Creating Tissue
+Tissue tissueNew Tissue1
+
+#Creating cell in tissue1 in location 0 0 0
+Tissue Tissue1 helperCellNew 0 0 0
+Tissue Tissue1 cytotoxicCellNew 0 0 1
+
+#Creating antibodies in south and north membranes of cell in 0 0 0
+Cell Tissue1 0 0 0 membrane south antibodyStrengthIs 50
+Cell Tissue1 0 0 1 membrane east antibodyStrengthIs 25
+
+Tissue Tissue1 infectionStartLocationIs 0 0 0 south 30
+Tissue Tissue1 infectionStartLocationIs 0 0 1 east 30

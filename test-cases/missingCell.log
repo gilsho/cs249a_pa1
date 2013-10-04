@@ -1,0 +1,10 @@
+#Creating Tissue
+Tissue tissueNew Tissue1
+Tissue Tissue1 infectionStartLocationIs 0 0 0 east 100
+
+#Creating cell in tissue1 in location 0 0 0
+Tissue Tissue1 helperCellNew 0 0 0
+Tissue Tissue1 cytotoxicCellNew 0 0 1
+
+Tissue Tissue1 infectionStartLocationIs 0 0 0 east 100
+Tissue Tissue1 infectionStartLocationIs 0 0 2 east 100
