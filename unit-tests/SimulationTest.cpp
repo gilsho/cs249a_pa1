@@ -234,9 +234,11 @@ TEST(Simulation, infectionStart3)
     }
   }
 
+
   Cell::Coordinates loc = {0, 0, 0};
   CellMembrane::Side side = CellMembrane::down();
   AntibodyStrength strength = AntibodyStrength(20);
+
   sim->infectionStart(tissue, loc, side, strength);
   
   for (int i = 0; i < 10; i++) {

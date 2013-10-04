@@ -17,10 +17,13 @@ void Simulation::TissueReactor::onCellNew(Cell::Ptr c)
 {
   CellMembrane::Ptr m;
   AntibodyStrength strength;
-  if (c->cellType() == Cell::cytotoxicCell()) 
+  if (c->cellType() == Cell::cytotoxicCell()) {
     strength = AntibodyStrength(initialCytotoxicStrength);
-  else 
+    psim->cytotoxicCells_++;
+  } else {
     strength = AntibodyStrength(initialHelperStrength);
+    psim->helperCells_++;
+  }
 
   m = c->membraneNew(c->name() + " north", CellMembrane::north());
   m->antibodyStrengthIs(strength);
@@ -36,16 +39,7 @@ void Simulation::TissueReactor::onCellNew(Cell::Ptr c)
   m->antibodyStrengthIs(strength);
 }
 
-Simulation::Simulation(Fwk::String _name) : Fwk::NamedInterface(_name) 
-{ 
-  infectedCells_ = 0;
-  infectedAttempts_ = 0;
-  strengthDifference_ = 0;
-  cytotoxicCells_ = 0;
-  helperCells_ = 0;
-  infectionSpread_ = 0;
-  longestInfectionPath_ = 0;
-}
+Simulation::Simulation(Fwk::String _name) : Fwk::NamedInterface(_name) {}
 
 /*
 Create a new tissue named "name". Quoted names are not accepted and therefore 
@@ -56,7 +50,10 @@ Tissue::Ptr Simulation::tissueNew(Fwk::String _name) {
   Tissue::Ptr t = Tissue::TissueNew(_name);
   TissueReactor::Ptr r = TissueReactor::TissueReactorIs(t.ptr());
   r->notifierIs(t);
+  ((TissueReactor *)r.ptr())->psim = this;
   tissues_[_name] = t;
+  helperCells_ = 0;
+  cytotoxicCells_ = 0;
   return t;
 }
 
@@ -87,10 +84,6 @@ Cell::Ptr Simulation::cellNew(Fwk::String _tissue, Cell::Coordinates loc,
   c = Cell::CellNew(loc, t.ptr(), ctype);
   assertValidPtr(c);
   t->cellIs(c);
-  if (ctype == Cell::helperCell())
-    helperCells_++;
-  else if (ctype == Cell::cytotoxicCell())
-    cytotoxicCells_++;
   
   return c;
 }
@@ -104,29 +97,61 @@ standard out as described here.
 void Simulation::infectionStart(Fwk::String _tissue, Cell::Coordinates loc, 
                     CellMembrane::Side side, AntibodyStrength strength)
 {
+  U32 attempts = 0;
+  S32 difference = 0;
+  U32 path = 0;
+
+
   Tissue::Ptr t = tissues_[_tissue];
   assertValidPtr(t);
 
-  Cell::Ptr rootCell = *(t->cellIter(loc));  
-  if (!infectionSpreadTo(rootCell, side, strength))
-    return;
-  queue<Cell::Ptr> infectionQueue;
-  infectionQueue.push(rootCell);
+  Cell::Ptr rootCell = *(t->cellIter(loc)); 
+  assertValidPtr(rootCell);
 
-  while (!infectionQueue.empty()) {
-    Cell::Ptr c = infectionQueue.front();
-    infectionQueue.pop();
+  attempts++;
+  if (!infectionSpreadTo(rootCell, side, strength, difference)) {
+    stats(_tissue, attempts, difference, path);
+    return;
+  }
+  
+  queue<Cell::Ptr> curRound, nextRound;
+  curRound.push(rootCell);
+
+  while (!curRound.empty()) {
+    Cell::Ptr c = curRound.front();
+    curRound.pop();
     c->healthIs(Cell::infected());
     for (U32 rawSide = 0; rawSide < 6; rawSide++) {
       CellMembrane::Side side = CellMembrane::SideInstance(rawSide);
       Cell::Ptr nbr = neighbor(t, c, side);
       if (nbr && nbr->health() != Cell::infected()) {
-        if (infectionSpreadTo(nbr, oppositeSide(side), strength)) {
-          infectionQueue.push(nbr);
+        attempts++;
+        S32 diff = 0;
+        if (infectionSpreadTo(nbr, oppositeSide(side), strength, diff)) {
+          difference += diff;
+          nextRound.push(nbr);
         }
       }
+    } 
+
+    if (curRound.empty()) {
+      swap(curRound,nextRound);
+      path++;
     }
+
   }
+
+  stats(_tissue, attempts, difference, path);
+}
+
+void Simulation::stats(Fwk::String _tissue, U32 attempts, S32 difference, 
+                       U32 path)
+{
+  cout << "infected|attempts|diff|cyto|helper|volume|path" << endl;
+  cout << infectedCells(_tissue) << " " << attempts << " " 
+    << difference << " " << cytotoxicCells_ << " " 
+    << helperCells_ << " " << infectionVolume(_tissue) << " " 
+    << path << endl;
 }
 
 Cell::Ptr Simulation::neighbor(Tissue::Ptr t, Cell::Ptr c, CellMembrane::Side side)
@@ -180,9 +205,11 @@ CellMembrane::Side Simulation::oppositeSide(CellMembrane::Side side)
   throw "invalid cell side";
 }
 
-bool Simulation::infectionSpreadTo(Cell::Ptr c, CellMembrane::Side side, AntibodyStrength attack)
+bool Simulation::infectionSpreadTo(Cell::Ptr c, CellMembrane::Side side, 
+                                   AntibodyStrength attack, S32& difference)
 {
   CellMembrane::Ptr m = *(c->membraneIterConst(side));
+  difference = (S32)attack.value()  - (S32)m->antibodyStrength().value();
   return (attack > m->antibodyStrength());
 }
 
@@ -323,7 +350,58 @@ CellMembrane::Side Simulation::sideIs(tokenizer<>::iterator token)
     return CellMembrane::down_;
 
   throw "Unrecognized membrane side";
+}
 
+U32 Simulation::infectionVolume(Fwk::String _tissue)
+{
+  Tissue::Ptr t = tissues_[_tissue];
+  assertValidPtr(t);
+
+  Tissue::CellIterator it = t->cellIter();
+  if (!it)
+    return 0;
+
+  Cell::Coordinates minLoc = (*it)->location();
+  Cell::Coordinates maxLoc = (*it)->location();
+
+  for (++it; it; ++it) {
+    Cell::Ptr c = *it;
+    assertValidPtr(c);
+    Cell::Coordinates loc = c->location();
+
+    if (loc.x < minLoc.x)
+      minLoc.x = loc.x;
+    if (loc.y < minLoc.y)
+      minLoc.y = loc.y;
+    if (loc.z < minLoc.z)
+      minLoc.z = loc.z;
+
+    if (loc.x > maxLoc.x)
+      maxLoc.x = loc.x;
+    if (loc.y > maxLoc.y)
+      maxLoc.y = loc.y;
+    if (loc.z > maxLoc.z)
+      maxLoc.z = loc.z;
+  }
+
+  return (maxLoc.x - minLoc.x + 1) * (maxLoc.y - minLoc.y + 1) *
+          (maxLoc.z - minLoc.z + 1);
+}
+
+U32 Simulation::infectedCells(Fwk::String _tissue) 
+{ 
+  Tissue::Ptr t = tissues_[_tissue];
+  assertValidPtr(t);
+  
+  U32 count = 0;
+  for (Tissue::CellIterator it = t->cellIter(); it; ++it) {
+    Cell::Ptr c = *it;
+    assertValidPtr(c);
+    if (c->health() == Cell::infected()) {
+      count++;
+    }
+  }
+  return count;
 }
 
 void Simulation::commandIs(Fwk::String textLine) 

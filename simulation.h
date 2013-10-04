@@ -8,7 +8,6 @@
 #include "fwk/LinkedList.h"
 #include "Tissue.h"
 
-
 using namespace std;
 using namespace boost;
 
@@ -61,6 +60,7 @@ protected:
 			static TissueReactor *TissueReactorIs(Tissue *t) {
 				return new TissueReactor(t);
 			}
+			Simulation *psim;
 		protected:
 			TissueReactor(Tissue *t) : Tissue::Notifiee() {}
 	};
@@ -71,43 +71,18 @@ protected:
 	CellMembrane::Side sideIs(tokenizer<>::iterator token);
 	Cell::Coordinates coordinateShifted(Cell::Coordinates loc, 
                                      CellMembrane::Side side);
-	bool infectionSpreadTo(Cell::Ptr c, CellMembrane::Side side, AntibodyStrength strength);
+	bool infectionSpreadTo(Cell::Ptr c, CellMembrane::Side side, 
+												 AntibodyStrength strength, S32& difference);
 	Cell::Ptr neighbor(Tissue::Ptr t, Cell::Ptr c, CellMembrane::Side side);
 	CellMembrane::Side oppositeSide(CellMembrane::Side side);
-
+	void stats(Fwk::String _tissue, U32 attempts, S32 difference, U32 path);
 
 	map<Fwk::String, Tissue::Ptr> tissues_;
 
-	/*
-	The statistics should be in the following format: 
-
-	a b c d e f g 
-
-	Where a is the total number of infected cells, b is the total infection 
-	attempts in that infection round, c is the total difference between disease 
-	strength and antibody strength for all infection attempts in that round, d is 
-	the total number of cytotoxic cells alive (infected and healthy), e is the 
-	number of helper cells (infected and healthy), f is the infection spread, and 
-	g is the length of the longest infection path measured from the root of 
-	infection. The infection spread is defined as the volume of the smallest 
-	rectangular box containing all infected cells. 
-	*/
-
-	U32 infectedCells() { return infectedCells_; }
-	U32 infectedAttempts() { return infectedAttempts_; }
-	U32 strengthDifference() { return strengthDifference_; }
-	U32 cytotoxicCells() { return cytotoxicCells_; }
-	U32 helperCells() { return helperCells_; }
-	U32 infectionSpread() { return infectionSpread_; }
-	U32 longestInfectionPath() { return longestInfectionPath_; }
-
-	U32 infectedCells_;
-	U32 infectedAttempts_;
-	U32 strengthDifference_;
+	U32 infectionVolume(Fwk::String _tissue);
+	U32 infectedCells(Fwk::String _tissue); 
 	U32 cytotoxicCells_;
 	U32 helperCells_;
-	U32 infectionSpread_;
-	U32 longestInfectionPath_;
 };
 
 #endif
