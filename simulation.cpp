@@ -391,7 +391,7 @@ U32 Simulation::infectionVolume()
   Tissue::CellIterator it = t->cellIter();
 
   // Loop to find first infected cell
-  for (++it; it; ++it) {
+  for (; it; ++it) {
     Cell::Ptr c = *it;
     if (c->health() == Cell::infected())
       break;
