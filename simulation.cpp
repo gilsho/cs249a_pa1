@@ -55,27 +55,25 @@ void Simulation::TissueReactor::onCellDel(Cell::Ptr c)
   }
 }
 
-Simulation::Simulation(Fwk::String _name) : Fwk::NamedInterface(_name) {}
-
 /*
 Create a new tissue named "name". Quoted names are not accepted and therefore 
 names cannot contain any whitespace. NOTE: The tissue name WILL NOT be any of 
 the commands, i.e. there will not be a tissue named "tissueNew".
 */
-Tissue::Ptr Simulation::tissueNew(Fwk::String _name) {
-  Tissue::Ptr t = Tissue::TissueNew(_name);
+Simulation::Simulation(Fwk::String _name) : 
+  Fwk::NamedInterface("sim" + _name) 
+{
+  t = Tissue::TissueNew(_name);
   TissueReactor::Ptr r = TissueReactor::TissueReactorIs(t.ptr());
   r->notifierIs(t);
   ((TissueReactor *)r.ptr())->psim = this;
-  tissues_[_name] = t;
   helperCells_ = 0;
   cytotoxicCells_ = 0;
-  return t;
 }
 
-Tissue::Ptr Simulation::tissue(Fwk::String _name)
+Tissue::Ptr Simulation::tissue()
 {
-  return tissues_[_name];
+  return t;
 }
 
 /*
@@ -86,12 +84,9 @@ report it. In any case, your simulation should continue running as if this
 entry did not exist. A new CytotoxicCell should have antibody strength of 100 
 on all its membranes.
 */
-Cell::Ptr Simulation::cellNew(Fwk::String _tissue, Cell::Coordinates loc, 
+Cell::Ptr Simulation::cellNew(Cell::Coordinates loc, 
   Cell::CellType ctype)
 {
-  Tissue::Ptr t = tissues_[_tissue];
-  assertValidPtr(t);
-
   // raise exception if cell already exists
   Cell::Ptr c = *(t->cellIter(loc));
   if (c)
@@ -139,7 +134,7 @@ membrane. You should proceed to the next command only when no more cells can be
 infected. At the end of the infection round, you should print statistics to 
 standard out as described here.
 */
-void Simulation::infectionStart(Fwk::String _tissue, Cell::Coordinates loc, 
+void Simulation::infectionStart(Cell::Coordinates loc, 
                     CellMembrane::Side side, AntibodyStrength strength)
 {
 
@@ -147,18 +142,14 @@ void Simulation::infectionStart(Fwk::String _tissue, Cell::Coordinates loc,
   S32 difference = 0;
   U32 path = 0;
 
-
-  Tissue::Ptr t = tissues_[_tissue];
-  assertValidPtr(t);
-
   Cell::Ptr rootCell = *(t->cellIter(loc)); 
   if (!rootCell) {
-    stats(_tissue, attempts, difference, path);
+    stats(attempts, difference, path);
     return;
   }
 
   if (!infectionSpreadTo(rootCell, side, strength, difference, attempts)) {
-    stats(_tissue, attempts, difference, path);
+    stats(attempts, difference, path);
     return;
   }
   
@@ -173,32 +164,32 @@ void Simulation::infectionStart(Fwk::String _tissue, Cell::Coordinates loc,
     CellMembrane::Side side;
 
     side = CellMembrane::north(); 
-    nbr = neighbor(t, c, side); 
+    nbr = neighbor(c, side); 
     if (infectionSpreadTo(nbr, oppositeSide(side), strength, difference, attempts))
         nextRound.push(nbr);
 
     side = CellMembrane::east(); 
-    nbr = neighbor(t, c, side); 
+    nbr = neighbor(c, side); 
     if (infectionSpreadTo(nbr, oppositeSide(side), strength, difference, attempts))
         nextRound.push(nbr);
 
     side = CellMembrane::south(); 
-    nbr = neighbor(t, c, side);
+    nbr = neighbor(c, side);
     if (infectionSpreadTo(nbr, oppositeSide(side), strength, difference, attempts))
         nextRound.push(nbr);
 
     side = CellMembrane::west(); 
-    nbr = neighbor(t, c, side);
+    nbr = neighbor(c, side);
     if (infectionSpreadTo(nbr, oppositeSide(side), strength, difference, attempts))
         nextRound.push(nbr);
 
     side = CellMembrane::up(); 
-    nbr = neighbor(t, c, side);
+    nbr = neighbor(c, side);
     if (infectionSpreadTo(nbr, oppositeSide(side), strength, difference, attempts))
         nextRound.push(nbr);
 
     side = CellMembrane::down(); 
-    nbr = neighbor(t, c, side);
+    nbr = neighbor(c, side);
     if (infectionSpreadTo(nbr, oppositeSide(side), strength, difference, attempts))
         nextRound.push(nbr);
 
@@ -209,7 +200,7 @@ void Simulation::infectionStart(Fwk::String _tissue, Cell::Coordinates loc,
 
   }
 
-  stats(_tissue, attempts, difference, path);
+  stats(attempts, difference, path);
 }
 
 bool Simulation::infectionSpreadTo(Cell::Ptr c, CellMembrane::Side side, 
@@ -230,17 +221,16 @@ bool Simulation::infectionSpreadTo(Cell::Ptr c, CellMembrane::Side side,
   return false;
 }
 
-void Simulation::stats(Fwk::String _tissue, U32 attempts, S32 difference, 
+void Simulation::stats(U32 attempts, S32 difference, 
                        U32 path)
 {
-  // cout << "infected|attempts|diff|cyto|helper|volume|path" << endl;
-  cout << infectedCells(_tissue) << " " << attempts << " " 
+  cout << infectedCells() << " " << attempts << " " 
     << difference << " " << cytotoxicCells_ << " " 
-    << helperCells_ << " " << infectionVolume(_tissue) << " " 
+    << helperCells_ << " " << infectionVolume() << " " 
     << path << endl;
 }
 
-Cell::Ptr Simulation::neighbor(Tissue::Ptr t, Cell::Ptr c, CellMembrane::Side side)
+Cell::Ptr Simulation::neighbor(Cell::Ptr c, CellMembrane::Side side)
 {
   Cell::Coordinates loc = c->location();
 
@@ -295,10 +285,8 @@ CellMembrane::Side Simulation::oppositeSide(CellMembrane::Side side)
 /*
 Remove all infected cells from "_tissue".
 */
-void Simulation::infectedCellsDel(Fwk::String _tissue)
+void Simulation::infectedCellsDel()
 {
-  Tissue::Ptr t = tissues_[_tissue];
-  assertValidPtr(t);
   queue<Fwk::String> cellsQueue;
   
   for (Tissue::CellIterator it = t->cellIter(); it; ++it) {
@@ -321,17 +309,15 @@ in "_tissue". Like the other cell creation commands, the simulation should
 continue running despite any exception that may be thrown.
 */
 
-void Simulation::cloneNew(Fwk::String _tissue, Cell::Coordinates loc, 
+void Simulation::cloneNew(Cell::Coordinates loc, 
               CellMembrane::Side side)
 {
 
-  Tissue::Ptr t = tissues_[_tissue];
-  assertValidPtr(t);
   Cell::Ptr c = *(t->cellIter(loc));
   Cell::CellType ctype = c->cellType();
   Cell::Coordinates cloneLoc = coordinateShifted(loc, side); 
   // cout << CoordToStr(cloneLoc) << endl;
-  Cell::Ptr clone = cellNew(_tissue, cloneLoc, ctype);
+  Cell::Ptr clone = cellNew(cloneLoc, ctype);
   
   clone->healthIs(c->health());
 
@@ -362,14 +348,12 @@ Cell::Coordinates Simulation::coordinateShifted(Cell::Coordinates loc,
   return shiftLoc;
 }
 
-void Simulation::antibodyStrengthIs(Fwk::String _tissue, Cell::Coordinates loc,
+void Simulation::antibodyStrengthIs(Cell::Coordinates loc,
                          CellMembrane::Side side, AntibodyStrength strength)
 {
-  Tissue::Ptr t = tissues_[_tissue];
-  assertValidPtr(t);
   Cell::Ptr c = *(t->cellIter(loc));
-  if (!c)
-    cellNew(_tissue, loc, DEFAULT_CELL_TYPE);
+  if (!c) 
+    cellNew(loc, DEFAULT_CELL_TYPE);
   CellMembrane::Ptr m = *(c->membraneIterConst(side));
   assertValidPtr(m);
   m->antibodyStrengthIs(strength);
@@ -381,10 +365,8 @@ direction. Equivalent to writing Cell x y z cloneNew "loc" for each cell in
 the _tissue. If any single cell throws an exception, you should continue the 
 simulation and clone the remaining cells.
 */
-void Simulation::cloneCellsNew(Fwk::String _tissue, CellMembrane::Side side) 
+void Simulation::cloneCellsNew(CellMembrane::Side side) 
 {
-  Tissue::Ptr t = tissues_[_tissue];
-  assertValidPtr(t);
   queue<Cell::Coordinates> cellsQueue;
   for (Tissue::CellIterator it = t->cellIter(); it; ++it) {
     Cell::Ptr c = *it;
@@ -396,7 +378,7 @@ void Simulation::cloneCellsNew(Fwk::String _tissue, CellMembrane::Side side)
     Cell::Coordinates loc = cellsQueue.front();
     cellsQueue.pop();
     try {
-      cloneNew(_tissue, loc, side);
+      cloneNew(loc, side);
     } catch(...) {
       //do nothing
     }
@@ -404,43 +386,8 @@ void Simulation::cloneCellsNew(Fwk::String _tissue, CellMembrane::Side side)
 }
 
 
-Cell::Coordinates Simulation::coordinateIs(tokenizer<char_separator<char> >::iterator token)
+U32 Simulation::infectionVolume()
 {
-  Cell::Coordinates loc;
-  loc.x = lexical_cast<S32>(*token++);
-  loc.y = lexical_cast<S32>(*token++);
-  loc.z = lexical_cast<S32>(*token);
-  return loc;
-}
-
-CellMembrane::Side Simulation::sideIs(tokenizer<char_separator<char> >::iterator token)
-{
-  if (*token == "north")
-    return CellMembrane::north_;
-
-  if (*token == "south")
-    return CellMembrane::south_;
-
-  if (*token == "east")
-    return CellMembrane::east_;
-
-  if (*token == "west")
-    return CellMembrane::west_;
-
-  if (*token == "up")
-    return CellMembrane::up_;
-
-  if (*token == "down")
-    return CellMembrane::down_;
-
-  throw "Unrecognized membrane side";
-}
-
-U32 Simulation::infectionVolume(Fwk::String _tissue)
-{
-  Tissue::Ptr t = tissues_[_tissue];
-  assertValidPtr(t);
-
   Tissue::CellIterator it = t->cellIter();
 
   // Loop to find first infected cell
@@ -482,11 +429,8 @@ U32 Simulation::infectionVolume(Fwk::String _tissue)
           (maxLoc.z - minLoc.z + 1);
 }
 
-U32 Simulation::infectedCells(Fwk::String _tissue) 
+U32 Simulation::infectedCells() 
 { 
-  Tissue::Ptr t = tissues_[_tissue];
-  assertValidPtr(t);
-  
   U32 count = 0;
   for (Tissue::CellIterator it = t->cellIter(); it; ++it) {
     Cell::Ptr c = *it;
@@ -496,75 +440,3 @@ U32 Simulation::infectedCells(Fwk::String _tissue)
   }
   return count;
 }
-
-void Simulation::commandIs(Fwk::String textLine) 
-{
-  if (textLine == "" || textLine[0] == '#')
-    return;
-
-  char_separator<char> sep(" ");
-  tokenizer<char_separator<char> > tokenizedLine(textLine, sep);
-  tokenizer<char_separator<char> >::iterator token=tokenizedLine.begin(); 
-
-  if (*token == "Tissue") {
-    token++;
-    if (*token == "tissueNew") {
-      token++;
-      tissueNew(*token);
-    } else {
-      Fwk::String _tissue = *token;
-      token++;
-      if (*token == "cytotoxicCellNew") {
-        token++;
-        Cell::Coordinates loc = coordinateIs(token);
-        cellNew(_tissue, loc, Cell::cytotoxicCell());
-      } else if (*token == "helperCellNew") {
-        token++;
-        Cell::Coordinates loc = coordinateIs(token);
-        cellNew(_tissue, loc, Cell::helperCell());
-      } else if (*token == "infectionStartLocationIs") {
-        token++;
-        Cell::Coordinates loc = coordinateIs(token);
-        token++; token++; token++;
-        CellMembrane::Side side = sideIs(token++);
-        AntibodyStrength strength = 
-          AntibodyStrength(lexical_cast<int>(*token++)); 
-        infectionStart(_tissue, loc, side, strength);
-      } else if (*token == "infectedCellsDel") {
-        infectedCellsDel(_tissue);
-      } else if (*token == "cloneCellsNew") {
-        token++;
-        CellMembrane::Side side = sideIs(token++);
-        cloneCellsNew(_tissue, side);
-      } else {
-        throw "Malformed command";
-      }
-    }
-  } else if (*token == "Cell") {
-    token++;
-    Fwk::String _tissue = *token++;
-    Cell::Coordinates loc = coordinateIs(token);
-    token++; token++; token++;
-    if (*token == "membrane") {
-      token++;
-      CellMembrane::Side side = sideIs(token++);
-      if (*token == "antibodyStrengthIs") {
-        *token++;
-        AntibodyStrength strength = 
-          AntibodyStrength(lexical_cast<int>(*token++));
-        antibodyStrengthIs(_tissue, loc, side, strength);
-      } else {
-        throw "Malformed command";
-      }
-    } else if (*token == "cloneNew") {
-      token++;
-      CellMembrane::Side side = sideIs(token++);
-      cloneNew(_tissue, loc, side);
-    } else {
-      throw "Malformed command";
-    }
-  } else {
-    throw "Malformed command";
-  }
-}
-

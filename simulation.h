@@ -26,28 +26,21 @@ public:
       return s;
    }
 
-	Tissue::Ptr tissueNew(Fwk::String _name);
+	Cell::Ptr cellNew(Cell::Coordinates loc, Cell::CellType ctype);
 
-	Tissue::Ptr tissue(Fwk::String _name);
+	void cloneNew(Cell::Coordinates loc, CellMembrane::Side side);
 
-	Cell::Ptr cellNew(Fwk::String tissue, Cell::Coordinates loc,
-							 Cell::CellType ctype);
+	void cloneCellsNew(CellMembrane::Side side);
 
-	void infectionStart(Fwk::String tissue, Cell::Coordinates loc, 
-	                    CellMembrane::Side side, AntibodyStrength strength);
+	void antibodyStrengthIs(Cell::Coordinates loc, CellMembrane::Side side, 
+													AntibodyStrength strength);
 
-	void infectedCellsDel(Fwk::String tissue);
+	void infectionStart(Cell::Coordinates loc, CellMembrane::Side side, 
+											AntibodyStrength strength);
 
-	void cloneNew(Fwk::String tissue, Cell::Coordinates loc, 
-								CellMembrane::Side side);
+	void infectedCellsDel();
 
-	void antibodyStrengthIs(Fwk::String tissue, Cell::Coordinates loc,
-	                         CellMembrane::Side side, AntibodyStrength strength);
-
-	void cloneCellsNew(Fwk::String tissue, CellMembrane::Side side);
-
-	void commandIs(Fwk::String textLine);
-
+	Tissue::Ptr tissue();
 
 protected:
 
@@ -70,22 +63,20 @@ protected:
 
 	Simulation(Fwk::String _name);
 	~Simulation() {}
-	Cell::Coordinates coordinateIs(tokenizer<char_separator<char> >::iterator token);
-	CellMembrane::Side sideIs(tokenizer<char_separator<char> >::iterator token);
 	Cell::Coordinates coordinateShifted(Cell::Coordinates loc, 
                                      CellMembrane::Side side);
 	bool infectionSpreadTo(Cell::Ptr c, CellMembrane::Side side, 
                                    AntibodyStrength attack, 
                                    S32& difference,
                                    U32& attempts);
-	Cell::Ptr neighbor(Tissue::Ptr t, Cell::Ptr c, CellMembrane::Side side);
+	Cell::Ptr neighbor(Cell::Ptr c, CellMembrane::Side side);
 	CellMembrane::Side oppositeSide(CellMembrane::Side side);
-	void stats(Fwk::String _tissue, U32 attempts, S32 difference, U32 path);
+	void stats(U32 attempts, S32 difference, U32 path);
 
-	map<Fwk::String, Tissue::Ptr> tissues_;
+	Tissue::Ptr t;
 
-	U32 infectionVolume(Fwk::String _tissue);
-	U32 infectedCells(Fwk::String _tissue); 
+	U32 infectionVolume();
+	U32 infectedCells(); 
 	U32 cytotoxicCells_;
 	U32 helperCells_;
 };
